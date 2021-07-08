@@ -1,0 +1,16 @@
+{
+	"name": "com.hooah.moddingtool",
+	"version": "1.0.0",
+	"displayName": "ILLUSION Modding Tool",
+	"description": "A Pack of code for streamlining modding experience with UNITY ILLUSION Games",
+
+	"unity": "2018.4",
+	"dependencies": { },
+
+	"keywords": ["attributes", "extensions", "editor tools"],
+	"author": { 
+		"name" : "hooh",
+	   	"email" : "hooh-hooah@protonmail.com"
+	}
+}
+
