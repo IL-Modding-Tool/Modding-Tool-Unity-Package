@@ -1,0 +1,16 @@
+{
+    "name": "ModdingToolAssetPipeline",
+    "references": [],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "FuzzySharp.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
