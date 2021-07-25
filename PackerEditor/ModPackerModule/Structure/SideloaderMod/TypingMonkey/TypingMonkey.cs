@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using hooh_ModdingTool.asm_Packer.Utility;
 using ModPackerModule.Utility;
+using UnityEditor;
 
 namespace ModPackerModule.Structure.SideloaderMod.TypingMonkey
 {
@@ -160,6 +161,7 @@ namespace ModPackerModule.Structure.SideloaderMod.TypingMonkey
         public void Update()
         {
             Document.NiceSave(Path.Combine(Mod.AssetDirectory, Mod.FileName).ToUnixPath());
+            AssetDatabase.Refresh();
         }
 
         public void Save()

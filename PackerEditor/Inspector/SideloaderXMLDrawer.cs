@@ -57,7 +57,7 @@ namespace ModPackerModule.Utility.Inspector
                 GUILayout.EndVertical();
 
                 GUILayout.Label("Issues", HoohWindowStyles.Title);
-                GUILayout.BeginVertical("box");
+                GUILayout.BeginVertical("box", GUILayout.Height(300));
                 var serializedProperty = serializedObject.FindProperty("Issues");
                 if (serializedProperty.arraySize <= 0)
                 {
@@ -67,7 +67,7 @@ namespace ModPackerModule.Utility.Inspector
                 {
                     EditorGUILayout.HelpBox("Modding tool found some issues while parsing the mod XML files.",
                         MessageType.Error);
-                    scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, false, true);
+                    scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(300));
                     foreach (var i in Enumerable.Range(0, serializedProperty.arraySize))
                     {
                         var prop = serializedProperty.GetArrayElementAtIndex(i);
