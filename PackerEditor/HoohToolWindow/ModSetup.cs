@@ -31,7 +31,6 @@ public partial class HoohTools
             {
                 InitializeObject(Command.HS2Map);
             });
-            WindowUtility.Button("Setup Mod Folder", () => { });
         });
 
         WindowUtility.VerticalLayout(() =>

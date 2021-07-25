@@ -8,7 +8,6 @@ using MyBox;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace ModPackerModule.Utility.Inspector
 {
