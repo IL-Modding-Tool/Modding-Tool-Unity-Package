@@ -114,7 +114,7 @@ namespace ModPackerModule.Utility.Inspector
             {
                 EditorGUILayout.HelpBox(
                     "This will only add example item entry inside of the <target> tag in sxml file. \n" +
-                    "Which will invalidate this mod $xml file by the default. " +
+                    "Which will invalidate this mod sxml file by the default. " +
                     "\n You will need to look inside of the file in order to make this mod sxml file valid after adding example file.",
                     MessageType.Warning);
 
