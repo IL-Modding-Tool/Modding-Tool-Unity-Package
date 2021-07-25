@@ -84,7 +84,14 @@ namespace ModPackerModule.Utility.Inspector
                 "\n You will need to look inside of the file in order to make this mod sxml file valid after adding example file.",
                 MessageType.Warning);
             GUILayout.BeginHorizontal();
-            PackerButton("Add Studio Example", mod => mod.CreateStudioThumbnails());
+            PackerButton("Add Studio Example", mod =>
+            {
+                var monkey = new TypingMonkey(in mod, mod.InputDocumentObject);
+                monkey.WriteCategory(true, 2020, "Example Big Category");
+                monkey.WriteCategory(false, 2020, "Example Mid Category", 1);
+                monkey.WriteStudioItem("example", "Example Item", 2020, 1);
+                monkey.Update();
+            });
             PackerCharacterButton("Add Clothing Example", _dropDownItems);
             PackerCharacterButton("Add Character Example", _dropDownItems);
             GUILayout.EndHorizontal();
