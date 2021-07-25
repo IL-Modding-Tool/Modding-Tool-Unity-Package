@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using hooh_ModdingTool.asm_Packer.Utility;
+using ModPackerModule.Structure.SideloaderMod;
 using ModPackerModule.Structure.SideloaderMod.Data;
 using ModPackerModule.Utility;
 using MyBox;
@@ -122,7 +123,8 @@ namespace ModPackerModule.Structure.BundleData
             return $"{SideloaderMod.GetAutoPathIndex(idKey):D3}";
         }
 
-        protected string GetAutoPath(in SideloaderMod.SideloaderMod sideloaderMod, string mode, string uniqueId, string parameter)
+        protected string GetAutoPath(in SideloaderMod.SideloaderMod sideloaderMod, string mode, string uniqueId,
+            string parameter)
         {
             var autoDestPath = $"{sideloaderMod.MainData.SafeName}_bundles/{uniqueId}";
             switch (mode)
@@ -217,18 +219,19 @@ namespace ModPackerModule.Structure.BundleData
         {
             if (isAllocBundle)
                 if (bundleAssets.IsNullOrEmpty())
-                    Debug.LogWarning($"Empty Assetbundle Detected: {bundlePath}");
-                else
-                    bundleAssets.ForEach(assetPath => SideloaderMod.RememberAsset(assetPath, bundlePath, Target));
+                {
+                    SideloaderMod.Issues.Add(new Issue
+                    {
+                        Message = $"Empty Assetbundle Detected: {bundlePath}",
+                        Suggest = "Please check <bundles> tag if its filtering everything or empty.",
+                        Level = Issue.IssueLevel.Warning,
+                        Type = Issue.IssueType.AssetBundleReference
+                    });
+                }
+                else bundleAssets.ForEach(assetPath => SideloaderMod.RememberAsset(assetPath, bundlePath, Target));
 
             // register asset for resolving assetbundle 
-            Bundles.Add(
-                new AssetBundleBuild
-                {
-                    assetBundleName = bundlePath,
-                    assetNames = bundleAssets
-                }
-            );
+            Bundles.Add(new AssetBundleBuild {assetBundleName = bundlePath, assetNames = bundleAssets});
         }
     }
 }
