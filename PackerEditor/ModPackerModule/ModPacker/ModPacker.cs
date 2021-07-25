@@ -56,7 +56,7 @@ namespace ModPackerModule
             List<SideloaderMod> packingMods;
             try
             {
-                packingMods = assets.Select(file => new SideloaderMod(file)).ToList();
+                packingMods = assets.Select(file => ScriptableObject.CreateInstance<SideloaderMod>()).ToList();
             }
             catch (Exception e)
             {

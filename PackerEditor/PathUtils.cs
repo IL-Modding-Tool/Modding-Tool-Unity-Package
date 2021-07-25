@@ -155,7 +155,7 @@ namespace ModPackerModule.Utility
                             .Select(path => path.Replace(Directory.GetCurrentDirectory().ToUnixPath(), "").Substring(1))
                             .FirstOrDefault();
 
-                        if (!xmlFilePath.IsNullOrEmpty() && TryLoadAsset<TextAsset>(xmlFilePath, out var textAsset)) return new SideloaderMod(textAsset);
+                        if (!xmlFilePath.IsNullOrEmpty() && TryLoadAsset<TextAsset>(xmlFilePath, out var textAsset)) return ScriptableObject.CreateInstance<SideloaderMod>();
 
                         currentDirectory = currentDirectory == "Assets" ? "" : Path.GetDirectoryName(currentDirectory);
                         failsafe--;
@@ -184,7 +184,7 @@ namespace ModPackerModule.Utility
 
                 if (!xmlFilePath.IsNullOrEmpty() && TryLoadAsset<TextAsset>(xmlFilePath, out var textAsset))
                 {
-                    result = new SideloaderMod(textAsset);
+                    result = ScriptableObject.CreateInstance<SideloaderMod>();
                     return true;
                 }
 
