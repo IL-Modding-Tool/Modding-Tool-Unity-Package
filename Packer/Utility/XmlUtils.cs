@@ -64,12 +64,7 @@ namespace hooh_ModdingTool.asm_Packer.Utility
                 NewLineChars = "\n",
                 NewLineHandling = NewLineHandling.Replace
             };
-            using (var writer = XmlWriter.Create(sb, settings))
-            {
-                if (writer != null)
-                    document.Save(writer);
-            }
-
+            using (var writer = XmlWriter.Create(sb, settings)) document.Save(writer);
             File.WriteAllText(path, sb.ToString());
         }
     }

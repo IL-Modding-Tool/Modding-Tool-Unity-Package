@@ -10,7 +10,6 @@ using ModPackerModule.Utility;
 using MyBox;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace ModPackerModule.Structure.SideloaderMod
 {
@@ -19,51 +18,55 @@ namespace ModPackerModule.Structure.SideloaderMod
         private const string TemplateModName = "Template Mod";
         private const string TemplateVersion = "0.0.1";
         private const string TemplateAuthor = "Anonymous";
+        private const string TemplateFileName = "mod.sxml";
 
         protected XDocument InputDocumentObject;
         protected XDocument OutputDocumentObject;
 
-        private static string Word()
-        {
-            return Lorem.Words(1, 1, false).ToLower();
-        }
+        private static string Word => Lorem.Words(1, 1, false).ToLower();
 
-        private static string GetRandomName()
-        {
-            return $"{Word()}.{Word()}.{Word()}";
-        }
+        private static string RandomName => $"{Word}.{Word}.{Word}";
 
         private static string GetTemplateDescription(string type)
         {
             return $"Template {type} Mod - Made with hooh's Modding Tool";
         }
 
+        private static string WriteAssetPath(string path = "", bool isAbsolute = false)
+        {
+            if (path.IsNullOrEmpty())
+                return Path.Combine(Directory.GetCurrentDirectory(), PathUtils.GetProjectPath(), TemplateFileName)
+                    .ToUnixPath();
+            return isAbsolute
+                ? path
+                : Path.Combine(Directory.GetCurrentDirectory(), path, TemplateFileName).ToUnixPath();
+        }
+
+        private static void CreateBaseXML(out XDocument root, out XElement packer, out XElement bundles,
+            out XElement build)
+        {
+            root = new XDocument();
+            bundles = new XElement("bundles");
+            build = new XElement("build");
+            packer = new XElement("packer", bundles, build);
+            root.Add(packer);
+        }
+
         [MenuItem("Assets/Mod XML Templates/Basic Mod")]
         public static void MakeTemplate(string guid = "", string name = "", string author = "", string desc = "",
             string path = "", bool isAbsolute = false)
         {
-            string assetPath;
-            if (path.IsNullOrEmpty())
-                assetPath = Path.Combine(Directory.GetCurrentDirectory(), PathUtils.GetProjectPath(), "mod.xml")
-                    .ToUnixPath();
-            else
-                assetPath = isAbsolute
-                    ? path
-                    : Path.Combine(Directory.GetCurrentDirectory(), path, "mod.xml").ToUnixPath();
+            var assetPath = WriteAssetPath(path, isAbsolute);
+            CreateBaseXML(out var document, out var bundles, out var build, out var packer);
 
-            var document = new XDocument();
-            document.Add(new XElement("packer",
-                new XElement("guid", guid.IsNullOrEmpty() ? GetRandomName() : guid),
-                new XElement("name", name.IsNullOrEmpty() ? TemplateModName : name),
-                new XElement("version", TemplateVersion),
-                new XElement("author", author.IsNullOrEmpty() ? TemplateAuthor : author),
-                new XElement("description", desc.IsNullOrEmpty() ? GetTemplateDescription("Generic") : desc),
-                new XElement("bundles",
-                    new XElement("folder", new XAttribute("auto-path", "prefabs"), new XAttribute("from", "output"),
-                        new XAttribute("filter", @".+?\.prefab"))
-                ),
-                new XElement("build")
-            ));
+            WriteModInfo(packer, "guid", guid.IsNullOrEmpty() ? RandomName : guid);
+            WriteModInfo(packer, "name", name.IsNullOrEmpty() ? TemplateModName : name);
+            WriteModInfo(packer, "version", TemplateVersion);
+            WriteModInfo(packer, "author", author.IsNullOrEmpty() ? TemplateAuthor : author);
+            WriteModInfo(packer, "description", desc.IsNullOrEmpty() ? GetTemplateDescription("Generic") : desc);
+
+            WriteFolderBundle(bundles, "output");
+
             document.NiceSave(assetPath);
             AssetDatabase.Refresh();
         }
@@ -71,42 +74,24 @@ namespace ModPackerModule.Structure.SideloaderMod
         [MenuItem("Assets/Mod XML Templates/Studio Map and Items")]
         public static void MakeStudioModTemplate()
         {
-            var assetPath = Path.Combine(Directory.GetCurrentDirectory(), PathUtils.GetProjectPath(), "mod.xml")
-                .ToUnixPath();
-            var document = new XDocument();
-            document.Add(new XElement("packer",
-                new XElement("guid", GetRandomName()),
-                new XElement("name", TemplateModName),
-                new XElement("version", TemplateVersion),
-                new XElement("author", TemplateAuthor),
-                new XElement("description", GetTemplateDescription("Studio Maps and Item")),
-                new XElement("bundles",
-                    new XElement("folder", new XAttribute("auto-path", "prefabs"), new XAttribute("from", "prefabs"),
-                        new XAttribute("filter", @".+?\.prefab")),
-                    new XElement("move", new XAttribute("auto-path", "studiothumb"), new XAttribute("from", "thumbs"),
-                        new XAttribute("filter", @".+?\.png"))
-                ),
-                new XElement("build",
-                    new XElement("list", new XAttribute("type", "bigcategory"),
-                        new XElement("item", new XAttribute("id", "2020"),
-                            new XAttribute("name", "Example Big Category"))
-                    ),
-                    new XElement("list", new XAttribute("type", "midcategory"),
-                        new XElement("item", new XAttribute("big-category", "2020"), new XAttribute("id", "1"),
-                            new XAttribute("name", "Example Mid Category"))
-                    ),
-                    new XElement("list", new XAttribute("type", "studioitem"), "")
-                )
-            ));
+            var assetPath = WriteAssetPath();
+            CreateBaseXML(out var document, out var bundles, out var build, out var packer);
+
+            WriteModInfo(packer, "guid", RandomName);
+            WriteModInfo(packer, "name", TemplateModName);
+            WriteModInfo(packer, "version", TemplateVersion);
+            WriteModInfo(packer, "author", TemplateAuthor);
+            WriteModInfo(packer, "description", GetTemplateDescription("Studio Maps and Item"));
+
+            WriteFolderBundle(bundles, "prefabs");
+            WriteMoveFolder(bundles, "move");
+
+            WriteCategory(build, true, 2020, "Example Big Category");
+            WriteCategory(build, false, 2020, "Example Mid Category", 1);
+            WriteStudioItem(build, "example", "Example Item", 2020, 1);
+
             document.NiceSave(assetPath);
             AssetDatabase.Refresh();
-        }
-
-        protected void ChangeXMLData(string key, string value)
-        {
-            var xElement = InputDocumentObject.Root?.Element(key);
-            if (xElement == null) return;
-            xElement.Value = value;
         }
 
         protected void UpdateBuildInfo()
@@ -151,11 +136,6 @@ namespace ModPackerModule.Structure.SideloaderMod
             itemList = new XElement("list", new XAttribute("type", type));
             buildElement.Add(itemList);
             return true;
-        }
-
-        public void UpsertClothing(string type)
-        {
-            // clothing has numerous variants.
         }
 
         public bool ValidatePrefabWriter(in GameObject[] gameObjects)
@@ -218,6 +198,19 @@ namespace ModPackerModule.Structure.SideloaderMod
                 foreach (var o in objects)
                     WriteStudioMap(in itemList, in existingItems, o);
             }, "scene");
+        }
+
+        public void InsertCharacterItems(in GameObject[] gameObjects, string key)
+        {
+            var objects = gameObjects;
+            if (!ValidatePrefabWriter(in gameObjects)) return;
+            CommonUpsertItems("studioitem", (itemList, existingItems) =>
+            {
+                foreach (var o in objects)
+                    WriteCharacterItem(in itemList, in existingItems, in o);
+                Debug.Log($"Successfully wrote {objects.Length} Studio Item(s) to the this mod xml file.");
+                EditorApplication.Beep();
+            });
         }
 
         public void Save(bool sayNoToExtension = false)

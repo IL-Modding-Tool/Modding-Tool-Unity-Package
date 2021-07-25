@@ -50,6 +50,19 @@ namespace ModPackerModule.Structure.SideloaderMod
             }
         }
 
+        private XElement BundleTargetXElement
+        {
+            get
+            {
+                var root = InputDocumentObject.Root;
+                if (root == null) return null;
+                var bundleElement = root.Element("bundles");
+                if (bundleElement != null) return bundleElement;
+                bundleElement = new XElement("bundles");
+                root.Add(bundleElement);
+                return bundleElement;
+            }
+        }
         private string TempZipFolder(string target) =>
             Path.Combine(Constants.PathTempFolder, GetSplitTargetName(target)).ToUnixPath();
 

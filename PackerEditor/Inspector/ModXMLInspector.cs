@@ -125,8 +125,8 @@ namespace ModPackerModule.Utility.Inspector
             });
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
-            PackerCharacterButton("As Clothing Items", _dropDownItems);
-            PackerCharacterButton("As Character Items", _dropDownItems);
+            // PackerCharacterButton("As Clothing Items", _dropDownItems);
+            // PackerCharacterButton("As Character Items", _dropDownItems);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             // -----------------------------------------------
@@ -157,8 +157,6 @@ namespace ModPackerModule.Utility.Inspector
                         "Mama Mia");
                     return;
                 }
-
-                Debug.Log("bruhmoment");
             });
             base.OnEnable();
         }
