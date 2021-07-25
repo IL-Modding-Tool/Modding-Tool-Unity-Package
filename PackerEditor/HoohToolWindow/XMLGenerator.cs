@@ -5,6 +5,7 @@ using ModPackerModule.Structure.SideloaderMod;
 using ModPackerModule.Utility;
 using MyBox;
 using UnityEditor;
+using UnityEngine;
 using Style = Common.HoohWindowStyles;
 
 public partial class HoohTools
@@ -63,13 +64,6 @@ public partial class HoohTools
         var parentFolder = Path.Combine(projectPath, TemplateModName);
 
         AssetDatabase.CreateFolder(projectPath, TemplateModName);
-        SideloaderMod.MakeTemplate(
-            TemplateModGUID,
-            TemplateModName,
-            TemplateModAuthor,
-            TemplateModDescription,
-            parentFolder
-        );
         AssetDatabase.CreateFolder(parentFolder, "assets");
         var combine = Path.Combine(parentFolder, "assets");
         AssetDatabase.CreateFolder(combine, "Textures");
@@ -77,7 +71,16 @@ public partial class HoohTools
         AssetDatabase.CreateFolder(combine, "Meshes");
         AssetDatabase.CreateFolder(combine, "AutoMeshes");
         AssetDatabase.CreateFolder(parentFolder, "output");
+        AssetDatabase.CreateAsset(new TextAsset("a"), Path.Combine(parentFolder, "output", "README.txt"));
         AssetDatabase.CreateFolder(parentFolder, "thumbs");
+        AssetDatabase.CreateAsset(new TextAsset("a"), Path.Combine(parentFolder, "thumbs", "README.txt"));
+        SideloaderMod.MakeTemplate(
+            TemplateModGUID,
+            TemplateModName,
+            TemplateModAuthor,
+            TemplateModDescription,
+            parentFolder
+        );
         callback?.Invoke();
     }
 }

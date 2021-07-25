@@ -42,55 +42,36 @@ namespace ModPackerModule.Structure.SideloaderMod
                 : Path.Combine(Directory.GetCurrentDirectory(), path, TemplateFileName).ToUnixPath();
         }
 
-        private static void CreateBaseXML(out XDocument root, out XElement packer, out XElement bundles,
-            out XElement build)
-        {
-            root = new XDocument();
-            bundles = new XElement("bundles");
-            build = new XElement("build");
-            packer = new XElement("packer", bundles, build);
-            root.Add(packer);
-        }
-
         [MenuItem("Assets/Mod XML Templates/Basic Mod")]
         public static void MakeTemplate(string guid = "", string name = "", string author = "", string desc = "",
             string path = "", bool isAbsolute = false)
         {
-            var assetPath = WriteAssetPath(path, isAbsolute);
-            CreateBaseXML(out var document, out var bundles, out var build, out var packer);
-
-            WriteModInfo(packer, "guid", guid.IsNullOrEmpty() ? RandomName : guid);
-            WriteModInfo(packer, "name", name.IsNullOrEmpty() ? TemplateModName : name);
-            WriteModInfo(packer, "version", TemplateVersion);
-            WriteModInfo(packer, "author", author.IsNullOrEmpty() ? TemplateAuthor : author);
-            WriteModInfo(packer, "description", desc.IsNullOrEmpty() ? GetTemplateDescription("Generic") : desc);
-
-            WriteFolderBundle(bundles, "output");
-
-            document.NiceSave(assetPath);
+            var monkey = new TypingMonkey.TypingMonkey(WriteAssetPath(path, isAbsolute));
+            monkey.WriteModInfo("guid", guid.IsNullOrEmpty() ? RandomName : guid);
+            monkey.WriteModInfo("name", name.IsNullOrEmpty() ? TemplateModName : name);
+            monkey.WriteModInfo("version", TemplateVersion);
+            monkey.WriteModInfo("author", author.IsNullOrEmpty() ? TemplateAuthor : author);
+            monkey.WriteModInfo("description", desc.IsNullOrEmpty() ? GetTemplateDescription("Generic") : desc);
+            monkey.WriteFolderBundle("output");
+            monkey.Save();
             AssetDatabase.Refresh();
         }
 
         [MenuItem("Assets/Mod XML Templates/Studio Map and Items")]
         public static void MakeStudioModTemplate()
         {
-            var assetPath = WriteAssetPath();
-            CreateBaseXML(out var document, out var bundles, out var build, out var packer);
-
-            WriteModInfo(packer, "guid", RandomName);
-            WriteModInfo(packer, "name", TemplateModName);
-            WriteModInfo(packer, "version", TemplateVersion);
-            WriteModInfo(packer, "author", TemplateAuthor);
-            WriteModInfo(packer, "description", GetTemplateDescription("Studio Maps and Item"));
-
-            WriteFolderBundle(bundles, "prefabs");
-            WriteMoveFolder(bundles, "move");
-
-            WriteCategory(build, true, 2020, "Example Big Category");
-            WriteCategory(build, false, 2020, "Example Mid Category", 1);
-            WriteStudioItem(build, "example", "Example Item", 2020, 1);
-
-            document.NiceSave(assetPath);
+            var monkey = new TypingMonkey.TypingMonkey(WriteAssetPath());
+            monkey.WriteModInfo("guid", RandomName);
+            monkey.WriteModInfo("name", TemplateModName);
+            monkey.WriteModInfo("version", TemplateVersion);
+            monkey.WriteModInfo("author", TemplateAuthor);
+            monkey.WriteModInfo("description", GetTemplateDescription("Studio Maps and Item"));
+            monkey.WriteFolderBundle("prefabs");
+            monkey.WriteMoveFolder("thumbs");
+            monkey.WriteCategory(true, 2020, "Example Big Category");
+            monkey.WriteCategory(false, 2020, "Example Mid Category", 1);
+            monkey.WriteStudioItem("example", "Example Item", 2020, 1);
+            monkey.Save();
             AssetDatabase.Refresh();
         }
 
