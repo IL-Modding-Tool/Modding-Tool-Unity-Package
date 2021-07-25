@@ -49,14 +49,17 @@ public partial class HoohTools
         if (TemplateModName.IsNullOrEmpty())
         {
             EditorApplication.Beep();
-            EditorUtility.DisplayDialog("Error", "You need to provide valid Mod Name to create mod context folder.", "Ok");
+            EditorUtility.DisplayDialog("Error", "You need to provide valid Mod Name to create mod context folder.",
+                "Ok");
             return;
         }
 
         if (TemplateModGUID.IsNullOrEmpty())
         {
             EditorApplication.Beep();
-            EditorUtility.DisplayDialog("Error", "You need to provide valid Mod GUID Name to create mod context folder. The mod GUID should not be same with other mod's GUID in order to prevent conflict between the mods.", "Ok");
+            EditorUtility.DisplayDialog("Error",
+                "You need to provide valid Mod GUID Name to create mod context folder. The mod GUID should not be same with other mod's GUID in order to prevent conflict between the mods.",
+                "Ok");
             return;
         }
 
@@ -71,14 +74,13 @@ public partial class HoohTools
         AssetDatabase.CreateFolder(combine, "Meshes");
         AssetDatabase.CreateFolder(combine, "AutoMeshes");
         AssetDatabase.CreateFolder(parentFolder, "output");
-        AssetDatabase.CreateAsset(new TextAsset("a"), Path.Combine(parentFolder, "output", "README.txt"));
+        AssetDatabase.CreateAsset(new TextAsset("Put prefabs in here."),
+            Path.Combine(parentFolder, "output", "README.txt"));
         AssetDatabase.CreateFolder(parentFolder, "thumbs");
-        AssetDatabase.CreateAsset(new TextAsset("a"), Path.Combine(parentFolder, "thumbs", "README.txt"));
+        AssetDatabase.CreateAsset(new TextAsset("put thumbnails in here."),
+            Path.Combine(parentFolder, "thumbs", "README.txt"));
         SideloaderMod.MakeTemplate(
-            TemplateModGUID,
-            TemplateModName,
-            TemplateModAuthor,
-            TemplateModDescription,
+            TemplateModGUID, TemplateModName, TemplateModAuthor, TemplateModDescription,
             parentFolder
         );
         callback?.Invoke();
