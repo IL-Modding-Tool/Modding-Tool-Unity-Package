@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -77,24 +76,9 @@ namespace ModPackerModule.Structure.SideloaderMod
 
         protected void UpdateBuildInfo()
         {
-            var xElement = InputDocumentObject.Root;
-            if (xElement == null) return;
-            var last = xElement.Element("last-build");
-            var time = DateTime.Now.ToLocalTime().ToString(CultureInfo.CurrentCulture);
-            if (last == null)
-            {
-                var newElement = new XElement("last-build");
-                newElement.SetAttributeValue("time", time);
-                newElement.SetAttributeValue("version", MainData.version);
-                xElement.Add(newElement);
-            }
-            else
-            {
-                last.SetAttributeValue("time", time);
-                last.SetAttributeValue("version", MainData.version);
-            }
-
-            Save(true);
+            var monkey = new TypingMonkey.TypingMonkey(this, InputDocumentObject);
+            monkey.UpdateLastBuild();
+            monkey.Update();
         }
 
         private bool TryGetListElement(string type, out XElement output)

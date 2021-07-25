@@ -148,7 +148,7 @@ namespace ModPackerModule.Structure.SideloaderMod
             }
         }
 
-        private string FileName { get; set; }
+        public string FileName { get; set; }
 
         public void RememberAsset(string path, string bundle, string target)
         {

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using hooh_ModdingTool.asm_Packer.Utility;
+using ModPackerModule.Utility;
 
 namespace ModPackerModule.Structure.SideloaderMod.TypingMonkey
 {
@@ -19,13 +22,6 @@ namespace ModPackerModule.Structure.SideloaderMod.TypingMonkey
         {
             Mod = sideloaderMod;
             Document = document;
-            if (Packer == null) throw new Exception("Invalid XML Document");
-        }
-
-        public TypingMonkey(in SideloaderMod sideloaderMod)
-        {
-            Mod = sideloaderMod;
-            Document = new XDocument(new XElement("packer", new XElement("bundles"), new XElement("build")));
             if (Packer == null) throw new Exception("Invalid XML Document");
         }
 
@@ -147,7 +143,28 @@ namespace ModPackerModule.Structure.SideloaderMod.TypingMonkey
             }
         }
 
+        public void UpdateLastBuild()
+        {
+            var last = Packer.Element("last-build");
+            var time = DateTime.Now.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+            if (last == null)
+            {
+                var newElement = new XElement("last-build");
+                newElement.SetAttributeValue("time", time);
+                newElement.SetAttributeValue("version", Mod.MainData.version);
+                Packer.Add(newElement);
+            }
+            else
+            {
+                last.SetAttributeValue("time", time);
+                last.SetAttributeValue("version", Mod.MainData.version);
+            }
+        }
 
+        public void Update()
+        {
+            Document.NiceSave(Path.Combine(Mod.AssetDirectory, Mod.FileName).ToUnixPath());
+        }
         public void Save()
         {
             Document.NiceSave(AssetPath);

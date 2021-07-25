@@ -65,7 +65,6 @@ public partial class HoohTools
 
         var projectPath = PathUtils.GetProjectPath();
         var parentFolder = Path.Combine(projectPath, TemplateModName);
-
         AssetDatabase.CreateFolder(projectPath, TemplateModName);
         AssetDatabase.CreateFolder(parentFolder, "assets");
         var combine = Path.Combine(parentFolder, "assets");
