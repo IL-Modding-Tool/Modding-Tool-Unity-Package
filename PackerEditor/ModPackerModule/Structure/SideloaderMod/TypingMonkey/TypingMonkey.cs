@@ -133,6 +133,16 @@ namespace ModPackerModule.Structure.SideloaderMod.TypingMonkey
             element.SetAttributeValue("name", name);
         }
 
+        public void WriteCharacterClothing(string key, string asset, string name)
+        {
+            var listRoot = GetBuildTarget(key);
+            if (listRoot == null) return;
+            var element = GetBuildTargetItem(in listRoot, "item", "mesh-a", asset);
+            element.SetAttributeValue("mesh-a", asset);
+            element.SetAttributeValue("name", name);
+            element.SetAttributeValue("thumb", "thumb_" + asset);
+        }
+
         public void UpdateLastBuild()
         {
             var last = Packer.Element("last-build");

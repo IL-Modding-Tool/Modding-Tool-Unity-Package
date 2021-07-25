@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Common;
 using hooh_ModdingTool.asm_Packer.Editor;
@@ -92,8 +93,8 @@ namespace ModPackerModule.Utility.Inspector
                 monkey.WriteStudioItem("example", "Example Item", 2020, 1);
                 monkey.Update();
             });
-            PackerCharacterButton("Add Clothing Example", _dropDownItems);
-            PackerCharacterButton("Add Character Example", _dropDownItems);
+            PackerCharacterButton("Add Clothing Example", _dropDownExampleItems);
+            PackerCharacterButton("Add Character Example", _dropDownExampleItems);
             GUILayout.EndHorizontal();
             PackerButton("Add Studio Map Example", mod =>
             {
@@ -164,9 +165,20 @@ namespace ModPackerModule.Utility.Inspector
         private SceneAsset[] SelectedScenes => Selection.objects.OfType<SceneAsset>().ToArray();
 
         private static WindowUtility.DropDownItem[] _dropDownItems;
+        private static WindowUtility.DropDownItem[] _dropDownExampleItems;
 
         public override void OnEnable()
         {
+            _dropDownExampleItems = Constants.CharacterClothingDropdownMenu(delegate(object userdata)
+            {
+                if (!(assetTarget is SideloaderMod t)) return;
+                if (!(userdata is object[] parameters)) return;
+                
+                var key = parameters[0] as string;
+                var monkey = new TypingMonkey(in t, t.InputDocumentObject);
+                monkey.WriteCharacterClothing(key, "example", "example");
+                monkey.Update();
+            });
             _dropDownItems = Constants.CharacterClothingDropdownMenu(delegate(object userdata)
             {
                 if (!(assetTarget is SideloaderMod t)) return;
@@ -178,7 +190,11 @@ namespace ModPackerModule.Utility.Inspector
                         "Mama Mia");
                     return;
                 }
+
+                var monkey = new TypingMonkey(in t, t.InputDocumentObject);
+                monkey.Update();
             });
+
             base.OnEnable();
         }
 

@@ -41,41 +41,67 @@ namespace hooh_ModdingTool.asm_Packer.Editor
 
         public static readonly List<DisplayMenu> CharacterClothingMenu = new List<DisplayMenu>
         {
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Arm", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Back", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Chest", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Ear", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Face", Visible = true, Description = ""},
             new DisplayMenu
-                {Parameters = new object[] { }, Name = "Accessory/Glasses", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Hand", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Head", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Kokan", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Leg", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Neck", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/None", Visible = true, Description = ""},
+                {Parameters = new object[] {"accarm"}, Name = "Accessory/Arm", Visible = true, Description = ""},
             new DisplayMenu
-                {Parameters = new object[] { }, Name = "Accessory/Shoulder", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Accessory/Waist", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Female/Top", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Female/Bottom", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Female/Gloves", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Female/Shoes", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Female/Socks", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Female/Stocking", Visible = true, Description = ""},
+                {Parameters = new object[] {"accback"}, Name = "Accessory/Back", Visible = true, Description = ""},
             new DisplayMenu
-                {Parameters = new object[] { }, Name = "Female/InnerBottom", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Female/InnerTop", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Male/Top", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Male/Bottom", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Male/Gloves", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Male/Head", Visible = true, Description = ""},
-            new DisplayMenu {Parameters = new object[] { }, Name = "Male/Shoes", Visible = true, Description = ""},
+                {Parameters = new object[] {"accchest"}, Name = "Accessory/Chest", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"accear"}, Name = "Accessory/Ear", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"accface"}, Name = "Accessory/Face", Visible = true, Description = ""},
+            new DisplayMenu
+            {
+                Parameters = new object[] {"accglasses"}, Name = "Accessory/Glasses", Visible = true, Description = ""
+            },
+            new DisplayMenu
+                {Parameters = new object[] {"acchand"}, Name = "Accessory/Hand", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"acchead"}, Name = "Accessory/Head", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"acckokan"}, Name = "Accessory/Kokan", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"accleg"}, Name = "Accessory/Leg", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"accneck"}, Name = "Accessory/Neck", Visible = true, Description = ""},
+            new DisplayMenu
+            {
+                Parameters = new object[] {"accshoulder"}, Name = "Accessory/Shoulder", Visible = true, Description = ""
+            },
+            new DisplayMenu
+                {Parameters = new object[] {"accwaist"}, Name = "Accessory/Waist", Visible = true, Description = ""},
+            new DisplayMenu {Parameters = new object[] {"ftop"}, Name = "Female/Top", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"fbottom"}, Name = "Female/Bottom", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"fgloves"}, Name = "Female/Gloves", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"fshoes"}, Name = "Female/Shoes", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"fsocks"}, Name = "Female/Socks", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"fpanst"}, Name = "Female/Stocking", Visible = true, Description = ""},
+            new DisplayMenu
+            {
+                Parameters = new object[] {"finbottom"}, Name = "Female/InnerBottom", Visible = true, Description = ""
+            },
+            new DisplayMenu
+                {Parameters = new object[] {"fintop"}, Name = "Female/InnerTop", Visible = true, Description = ""},
+            new DisplayMenu {Parameters = new object[] {"mtop"}, Name = "Male/Top", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"mbottom"}, Name = "Male/Bottom", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"mgloves"}, Name = "Male/Gloves", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"mshoes"}, Name = "Male/Shoes", Visible = true, Description = ""},
         };
 
         public static readonly List<DisplayMenu> CharacterMenu = new List<DisplayMenu>
         {
-            new DisplayMenu {Parameters = new object[] { }, Name = "Female/Head", Visible = true, Description = ""},
+            new DisplayMenu {Parameters = new object[] {"mhead"}, Name = "Male/Head", Visible = true, Description = ""},
+            new DisplayMenu
+                {Parameters = new object[] {"fhead"}, Name = "Female/Head", Visible = true, Description = ""},
             new DisplayMenu
                 {Parameters = new object[] { }, Name = "Female/Texture/DetailBody", Visible = true, Description = ""},
             new DisplayMenu
@@ -128,7 +154,9 @@ namespace hooh_ModdingTool.asm_Packer.Editor
                 .Where(x => x.Visible)
                 .Select(x => new WindowUtility.DropDownItem
                 {
-                    Name = x.Name, On = false, Callback = userdataCallback,
+                    Name = x.Name,
+                    On = false,
+                    Callback = userdataCallback,
                     Parameter = x.Parameters
                 })
                 .ToArray();
