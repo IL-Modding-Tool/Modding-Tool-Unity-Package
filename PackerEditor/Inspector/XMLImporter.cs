@@ -9,7 +9,8 @@ namespace ModPackerModule.Utility.Inspector
     [ScriptedImporter(1, "sxml")]
     public class XMLImporter : ScriptedImporter
     {
-        public string Message;
+        public int xmlSmallCategory;
+        public int xmlBigCategory;
 
         public override void OnImportAsset(AssetImportContext ctx)
         {

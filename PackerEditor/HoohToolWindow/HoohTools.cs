@@ -129,7 +129,6 @@ public partial class HoohTools : EditorWindow
                     break;
                 case MenuMode.ModIntegration:
                     DrawThumbnailUtility(serializedObject);
-                    DrawXMLHelper(serializedObject);
                     DrawModBuilder(serializedObject);
                     break;
                 case MenuMode.UnityMacro:

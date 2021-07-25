@@ -5,8 +5,8 @@ using ModPackerModule.Structure.SideloaderMod;
 using ModPackerModule.Utility;
 using MyBox;
 using UnityEditor;
-
 using Style = Common.HoohWindowStyles;
+
 public partial class HoohTools
 {
     public bool foldModTemplateInitializer = true;
@@ -24,26 +24,22 @@ public partial class HoohTools
 
         WindowUtility.VerticalLayout(() =>
         {
+            TemplateModGUID = EditorPrefs.GetString("hoohTool_modGUID");
+            TemplateModName = EditorPrefs.GetString("hoohTool_modName");
+            TemplateModAuthor = EditorPrefs.GetString("hoohTool_modAuthor");
+            TemplateModDescription = EditorPrefs.GetString("hoohTool_modDescription");
+
             EditorPrefs.SetString("hoohTool_modGUID", EditorGUILayout.TextField("Mod GUID: ", TemplateModGUID));
             EditorPrefs.SetString("hoohTool_modName", EditorGUILayout.TextField("Mod Name: ", TemplateModName));
             EditorPrefs.SetString("hoohTool_modAuthor", EditorGUILayout.TextField("Mod Author: ", TemplateModAuthor));
             EditorPrefs.SetString("hoohTool_modDescription",
                 EditorGUILayout.TextField("Mod Description: ", TemplateModDescription));
 
-            TemplateModGUID = EditorPrefs.GetString("hoohTool_modGUID");
-            TemplateModName = EditorPrefs.GetString("hoohTool_modName");
-            TemplateModAuthor = EditorPrefs.GetString("hoohTool_modAuthor");
-            TemplateModDescription = EditorPrefs.GetString("hoohTool_modDescription");
-
             EditorGUILayout.HelpBox(
                 "The Example Mod Folder will be created within the path of current directory of the 'Project' window",
                 MessageType.Warning);
 
-            WindowUtility.Button("Create Studio Map Mod", () => { CreateModContext(() => { }); });
-            WindowUtility.Button("Create Studio Items Mod", () => { CreateModContext(() => { }); });
-            WindowUtility.Button("Create Clothing Mod", () => { CreateModContext(() => { }); });
-            WindowUtility.Button("Create Character Texture Mod", () => { CreateModContext(() => { }); });
-            WindowUtility.Button("Create Graphics Cubemap Mod", () => { CreateModContext(() => { }); });
+            WindowUtility.Button("Create Mod Context Folder", () => { CreateModContext(() => { }); });
         });
     }
 
@@ -51,13 +47,15 @@ public partial class HoohTools
     {
         if (TemplateModName.IsNullOrEmpty())
         {
-            EditorUtility.DisplayDialog("Error", "Invalid Mod Name", "Ok");
+            EditorApplication.Beep();
+            EditorUtility.DisplayDialog("Error", "You need to provide valid Mod Name to create mod context folder.", "Ok");
             return;
         }
 
         if (TemplateModGUID.IsNullOrEmpty())
         {
-            EditorUtility.DisplayDialog("Error", "Invalid Mod GUID", "Ok");
+            EditorApplication.Beep();
+            EditorUtility.DisplayDialog("Error", "You need to provide valid Mod GUID Name to create mod context folder. The mod GUID should not be same with other mod's GUID in order to prevent conflict between the mods.", "Ok");
             return;
         }
 

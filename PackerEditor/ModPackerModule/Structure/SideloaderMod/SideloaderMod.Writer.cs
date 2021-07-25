@@ -155,39 +155,46 @@ namespace ModPackerModule.Structure.SideloaderMod
             Debug.Log("Attempting upsert clothing component");
         }
 
-        public void UpsertStudioItems(IEnumerable<GameObject> gameObjects, int bigCategory = 0, int midCategory = 0)
+        public void UpsertStudioItems(GameObject[] gameObjects, int bigCategory = 0, int midCategory = 0)
         {
             // I really don't like the performance here, There must be the way to unfuck this mess.
-            var studioItemList = GetListElement("studioitem");
-            if (ReferenceEquals(studioItemList, null)) return;
-
-            var existingItems = studioItemList.Elements("item").Where(x => x.Attribute("object") != null).ToDictionary(
-                x => x.Attr("object"),
-                x => x
-            );
-
-            foreach (var gameObject in gameObjects)
+            try
             {
-                var name = gameObject.name;
-                var prettyName = CommonUtils.Prettify(name);
+                var studioItemList = GetListElement("studioitem");
 
-                if (existingItems.ContainsKey(name))
+                if (gameObjects.Length <= 0)
                 {
-                    // Update
-                    var item = existingItems[name];
-                    item.SetAttributeValue("mid-category", midCategory);
-                    item.SetAttributeValue("big-category", bigCategory);
+                    Debug.LogError("You must select at least one valid prefabs from the project window.");
+                    return;
                 }
-                else
+
+                Array.Sort(gameObjects, (x, y) => string.Compare(x.name, y.name, StringComparison.Ordinal));
+
+                if (ReferenceEquals(studioItemList, null))
                 {
-                    // Insert
-                    studioItemList.Add(new XElement("item",
-                        new XAttribute("object", name),
-                        new XAttribute("name", prettyName),
-                        new XAttribute("mid-category", midCategory),
-                        new XAttribute("big-category", bigCategory)
-                    ));
+                    Debug.LogError("Failed to find any build>list>studioitem node.");
+                    return;
                 }
+
+                var existingItems = studioItemList.Elements("item").Where(x => x.Attribute("object") != null)
+                    .ToDictionary(
+                        x => x.Attr("object"),
+                        x => x
+                    );
+
+                foreach (var gameObject in gameObjects)
+                    WriteStudioItem(in studioItemList, in existingItems, gameObject, bigCategory, midCategory);
+
+                Debug.Log($"Successfully wrote {gameObjects.Length} item(s) to the this mod xml file.");
+                EditorApplication.Beep();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                EditorApplication.Beep();
+                EditorUtility.DisplayDialog("Error",
+                    "An error has occured while writing selected items into the sxml file.\n" +
+                    "Please file a report to the Modding Tool Repository if you think this is a bug.", "Hmmm");
             }
         }
 

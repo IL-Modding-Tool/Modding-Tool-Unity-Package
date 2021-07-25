@@ -18,6 +18,8 @@ public partial class HoohTools
         HS2Map = 10,
         AIMap = 20,
         AIFurniture,
+        FemaleClothing = 100,
+        FemaleTop,
         RemoveAll = 999
     }
 
@@ -87,10 +89,10 @@ public partial class HoohTools
         });
     }
 
-    public void CallHelper(string functionName, params object[] parameters) => CallFromEditor("AIObjectHelper", functionName, parameters);
-    public void MapHelper(string functionName, params object[] parameters) => CallFromEditor("MapInitializer", functionName, parameters);
+    public static void CallHelper(string functionName, params object[] parameters) => CallFromEditor("AIObjectHelper", functionName, parameters);
+    public static void MapHelper(string functionName, params object[] parameters) => CallFromEditor("MapInitializer", functionName, parameters);
 
-    public void CallFromEditor(string className, string functionName, params object[] parameters)
+    public static void CallFromEditor(string className, string functionName, params object[] parameters)
     {
         
         var type = Type.GetType($"{className}, Assembly-CSharp-Editor");
@@ -102,7 +104,7 @@ public partial class HoohTools
         method.Invoke(null, parameters);
     }
 
-    private void InitializeObject(object _command)
+    public static void InitializeObject(object _command)
     {
         var command = (Command) _command;
 
