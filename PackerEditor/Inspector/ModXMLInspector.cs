@@ -139,7 +139,7 @@ namespace ModPackerModule.Utility.Inspector
                 using (new GUILayout.HorizontalScope())
                 {
                     PackerCharacterButton("Add Clothing Example", _dropDownExampleItems);
-                    PackerCharacterButton("Add Character Example", _dropDownExampleItems);
+                    // PackerCharacterButton("Add Character Example", _dropDownExampleItems);
                 }
             }
 
@@ -226,6 +226,7 @@ namespace ModPackerModule.Utility.Inspector
                 monkey.WriteCharacterClothing(key, "example", "example");
                 monkey.Update();
             });
+
             _dropDownItems = Constants.CharacterClothingDropdownMenu(delegate(object userdata)
             {
                 if (!(assetTarget is SideloaderMod t)) return;
