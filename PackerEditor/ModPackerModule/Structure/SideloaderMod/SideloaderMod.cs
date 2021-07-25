@@ -139,6 +139,12 @@ namespace ModPackerModule.Structure.SideloaderMod
 
                 ParseDocument(InputDocumentObject.Root);
             }
+            catch (InvalidBundleTargetException be)
+            {
+            }
+            catch (InvalidListTargetException le)
+            {
+            }
             catch (Exception e)
             {
                 Debug.LogError(e);

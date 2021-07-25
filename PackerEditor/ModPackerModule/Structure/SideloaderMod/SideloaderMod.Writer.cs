@@ -19,8 +19,8 @@ namespace ModPackerModule.Structure.SideloaderMod
         private const string TemplateAuthor = "Anonymous";
         private const string TemplateFileName = "mod.sxml";
 
-        protected XDocument InputDocumentObject;
-        protected XDocument OutputDocumentObject;
+        public XDocument InputDocumentObject { get; protected set; }
+        public XDocument OutputDocumentObject;
 
         private static string Word => Lorem.Words(1, 1, false).ToLower();
 

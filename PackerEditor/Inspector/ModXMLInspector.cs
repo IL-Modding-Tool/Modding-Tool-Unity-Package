@@ -3,6 +3,7 @@ using System.Linq;
 using Common;
 using hooh_ModdingTool.asm_Packer.Editor;
 using ModPackerModule.Structure.SideloaderMod;
+using ModPackerModule.Structure.SideloaderMod.TypingMonkey;
 using MyBox;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
@@ -55,12 +56,21 @@ namespace ModPackerModule.Utility.Inspector
                         $"You built the mod in {t.lastBuildTime}.\nThe last build was version {t.lastBuildVersion}.",
                         MessageType.Info);
                 }
+
+                var isValid = t.Issues.Count <= 0;
+                GUILayout.BeginHorizontal();
+                GUI.backgroundColor = isValid ? HoohWindowStyles.green : HoohWindowStyles.red;
+                PackerButton("Build Mod", mod =>
+                {
+                    var check = isValid || EditorUtility.DisplayDialog("Are you sure?",
+                        "This XML is not valid. Are you sure that you want to continue?", "Yes", "No");
+                    if (check) mod.Build(HoohTools.GameExportPath);
+                });
+                GUI.backgroundColor = Color.white;
+                PackerButton("Test Mod", mod => { mod.Build(HoohTools.GameExportPath, true); });
+                GUILayout.EndHorizontal();
             }
 
-            GUILayout.BeginHorizontal();
-            PackerButton("Build Mod", mod => { mod.Build(HoohTools.GameExportPath); });
-            PackerButton("Test Mod", mod => { mod.Build(HoohTools.GameExportPath, true); });
-            GUILayout.EndHorizontal();
             // -----------------------------------------------
             GUILayout.Label("Thumbnail Creation", HoohWindowStyles.Medium);
             GUILayout.BeginHorizontal();
@@ -79,7 +89,12 @@ namespace ModPackerModule.Utility.Inspector
             PackerCharacterButton("Add Clothing Example", _dropDownItems);
             PackerCharacterButton("Add Character Example", _dropDownItems);
             GUILayout.EndHorizontal();
-            PackerButton("Add Studio Map Example", mod => mod.CreateItemThumbnails());
+            PackerButton("Add Studio Map Example", mod =>
+            {
+                var monkey = new TypingMonkey(in mod, mod.InputDocumentObject);
+                monkey.WriteStudioMap("example", "example");
+                monkey.Update();
+            });
             // -----------------------------------------------
             GUILayout.Label("Item Registration from Selection", HoohWindowStyles.Medium);
             if (!ActiveEditorTracker.sharedTracker.isLocked)
