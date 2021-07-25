@@ -27,9 +27,6 @@ namespace hooh_ModdingTool.asm_Packer.Editor
 
     public static class Constants
     {
-        // Register with shit
-        // Register what that.
-
         public static readonly List<DisplayMenu> NonCharacterMenu = new List<DisplayMenu>
         {
             new DisplayMenu {Parameters = new object[] { }, Name = "MainGame/AI/Map", Visible = true, Description = ""},

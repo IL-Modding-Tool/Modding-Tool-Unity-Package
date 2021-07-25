@@ -18,7 +18,8 @@ namespace ModPackerModule.Structure.ListData
         // Color3 - processed by ItemComponent
         // IsScalable - processed by ItemComponent
         // IsEmission - processed by ItemComponent
-        public ListStudioItem(in SideloaderMod.SideloaderMod sideloaderMod, in XElement element) : base(in sideloaderMod, in element)
+        public ListStudioItem(in SideloaderMod.SideloaderMod sideloaderMod, in XElement element) : base(
+            in sideloaderMod, in element)
         {
             BigCategory = element.Attr("big-category", -1);
             MidCategory = element.Attr("mid-category", -1);
@@ -26,7 +27,20 @@ namespace ModPackerModule.Structure.ListData
             Asset = element.Attr<string>("object");
             AssetBundle = element.Attr("object-bundle", GetBundleFromName(Asset) ?? "0");
             if (!sideloaderMod.StudioInfo.RememberStudioItem(this))
-                sideloaderMod.Issues.Add(new Issue(Issue.IssueLevel.Warning, Issue.IssueType.BuildTarget, $"Duplicate Studio Item Entry: \"{Name}\" ", "Remove duplicated name inside of the target list. It might cause thumbnail issues."));
+                sideloaderMod.Issues.Add(new Issue(Issue.IssueLevel.Warning, Issue.IssueType.BuildTarget,
+                    $"Duplicate Studio Item Entry: \"{Name}\" ",
+                    "Remove duplicated name inside of the target list. It might cause thumbnail issues."));
+        }
+
+        public XElement ToXElement(bool outputAssetBundle = false)
+        {
+            return new XElement("item",
+                new XAttribute("big-category", BigCategory),
+                new XAttribute("mid-category", MidCategory),
+                new XAttribute("name", Name),
+                new XAttribute("object", Asset),
+                outputAssetBundle ? new XAttribute("mid-category", AssetBundle) : null
+            );
         }
 
         public int BigCategory { get; }
@@ -59,7 +73,8 @@ namespace ModPackerModule.Structure.ListData
 
         public new static string GetOutputHeader()
         {
-            return "ID,BigCategory,MidCategory,Name,Manifest,Bundle,Object,Child,IsAnime,IsColor,柄,IsColor2,柄,IsColor3,柄,拡縮判定,Emission";
+            return
+                "ID,BigCategory,MidCategory,Name,Manifest,Bundle,Object,Child,IsAnime,IsColor,柄,IsColor2,柄,IsColor3,柄,拡縮判定,Emission";
         }
     }
 }

@@ -130,29 +130,60 @@ namespace ModPackerModule.Structure.SideloaderMod
             Save(true);
         }
 
-        private XElement GetListElement(string type)
+        private bool TryGetListElement(string type, out XElement output)
         {
-            var buildElement = InputDocumentObject.Root?.Element("build");
-            if (buildElement == null) return default;
+            output = default;
+            var buildElement = BuildTargetXElement;
+            if (buildElement == null)
+            {
+                Debug.LogError("The xml file has no <build> node.");
+                return false;
+            }
+
             if (buildElement.Value != "") buildElement.Value = "";
-
             var itemList = buildElement.Elements()
-                .FirstOrDefault(
-                    element => element.Name.LocalName == "list" && element.Attribute("type")?.Value == type
-                );
-            if (!ReferenceEquals(itemList, null)) return itemList;
-
+                .FirstOrDefault(element =>
+                    element.Name.LocalName == "list" &&
+                    element.Attribute("type")?.Value == type);
+            output = itemList;
+            if (!ReferenceEquals(itemList, null)) return true;
             itemList = new XElement("list", new XAttribute("type", type));
             buildElement.Add(itemList);
-            return itemList;
+            return true;
         }
 
         public void UpsertClothing(string type)
         {
             // clothing has numerous variants.
-            var studioItemList = GetListElement(type);
-            if (ReferenceEquals(studioItemList, null)) return;
-            Debug.Log("Attempting upsert clothing component");
+        }
+
+        public bool ValidatePrefabWriter(in GameObject[] gameObjects)
+        {
+            if (gameObjects.Length <= 0)
+            {
+                Debug.LogError("You must select at least one valid prefabs from the project window.");
+                return false;
+            }
+
+            Array.Sort(gameObjects, (x, y) => string.Compare(x.name, y.name, StringComparison.Ordinal));
+            return true;
+        }
+
+        public void CommonWriterExceptionHandler(Exception e)
+        {
+            Debug.LogError(e);
+            EditorApplication.Beep();
+            EditorUtility.DisplayDialog("Error",
+                "An error has occured while writing selected items into the sxml file.\n" +
+                "Please file a report to the Modding Tool Repository if you think this is a bug.", "Hmmm");
+        }
+
+
+        public Dictionary<string, XElement> GetItemsByAsset(in XElement root)
+        {
+            return root.Elements("item")
+                .Where(x => x.Attribute("object") != null)
+                .ToDictionary(x => x.Attr("object"), x => x);
         }
 
         public void UpsertStudioItems(GameObject[] gameObjects, int bigCategory = 0, int midCategory = 0)
@@ -160,28 +191,10 @@ namespace ModPackerModule.Structure.SideloaderMod
             // I really don't like the performance here, There must be the way to unfuck this mess.
             try
             {
-                var studioItemList = GetListElement("studioitem");
+                if (!ValidatePrefabWriter(in gameObjects)) return;
+                if (!TryGetListElement("studioitem", out var studioItemList)) return;
 
-                if (gameObjects.Length <= 0)
-                {
-                    Debug.LogError("You must select at least one valid prefabs from the project window.");
-                    return;
-                }
-
-                Array.Sort(gameObjects, (x, y) => string.Compare(x.name, y.name, StringComparison.Ordinal));
-
-                if (ReferenceEquals(studioItemList, null))
-                {
-                    Debug.LogError("Failed to find any build>list>studioitem node.");
-                    return;
-                }
-
-                var existingItems = studioItemList.Elements("item").Where(x => x.Attribute("object") != null)
-                    .ToDictionary(
-                        x => x.Attr("object"),
-                        x => x
-                    );
-
+                var existingItems = GetItemsByAsset(studioItemList);
                 foreach (var gameObject in gameObjects)
                     WriteStudioItem(in studioItemList, in existingItems, gameObject, bigCategory, midCategory);
 
@@ -190,11 +203,7 @@ namespace ModPackerModule.Structure.SideloaderMod
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
-                EditorApplication.Beep();
-                EditorUtility.DisplayDialog("Error",
-                    "An error has occured while writing selected items into the sxml file.\n" +
-                    "Please file a report to the Modding Tool Repository if you think this is a bug.", "Hmmm");
+                CommonWriterExceptionHandler(e);
             }
         }
 

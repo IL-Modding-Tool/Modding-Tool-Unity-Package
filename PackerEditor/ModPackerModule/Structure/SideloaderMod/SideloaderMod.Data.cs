@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using ModPackerModule.Utility;
 using UnityEditor;
 using UnityEngine;
@@ -34,6 +35,20 @@ namespace ModPackerModule.Structure.SideloaderMod
 
         private string ManifestAssetFolder =>
             Path.Combine(Constants.PathBundleCache, DependencyData.ManifestName).ToUnixPath();
+
+        private XElement BuildTargetXElement
+        {
+            get
+            {
+                var root = InputDocumentObject.Root;
+                if (root == null) return null;
+                var buildElement = root.Element("build");
+                if (buildElement != null) return buildElement;
+                buildElement = new XElement("build");
+                root.Add(buildElement);
+                return buildElement;
+            }
+        }
 
         private string TempZipFolder(string target) =>
             Path.Combine(Constants.PathTempFolder, GetSplitTargetName(target)).ToUnixPath();

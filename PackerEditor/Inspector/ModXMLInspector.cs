@@ -3,6 +3,7 @@ using System.Linq;
 using Common;
 using hooh_ModdingTool.asm_Packer.Editor;
 using ModPackerModule.Structure.SideloaderMod;
+using MyBox;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
@@ -32,16 +33,29 @@ namespace ModPackerModule.Utility.Inspector
             EditorGUILayout.HelpBox(
                 "You can check information about this mod file in the \"Imported Objects\" Menu below.",
                 MessageType.Info);
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button(
-                ActiveEditorTracker.sharedTracker.isLocked ? "Release this window" : "Keep this window"
-            ))
-            {
+                ActiveEditorTracker.sharedTracker.isLocked ? "Release this window" : "Keep this window"))
                 ActiveEditorTracker.sharedTracker.isLocked = !ActiveEditorTracker.sharedTracker.isLocked;
-            }
+
+            if (ActiveEditorTracker.sharedTracker.isLocked && GUILayout.Button("Select this mod.sxml file."))
+                EditorGUIUtility.PingObject(assetTarget);
+
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginVertical("box");
             GUILayout.Label("Build Mod", HoohWindowStyles.Medium);
             // -----------------------------------------------
+            if (assetTarget is SideloaderMod t)
+            {
+                if (!t.lastBuildTime.IsNullOrEmpty() && !t.lastBuildVersion.IsNullOrEmpty())
+                {
+                    EditorGUILayout.HelpBox(
+                        $"You built the mod in {t.lastBuildTime}.\nThe last build was version {t.lastBuildVersion}.",
+                        MessageType.Info);
+                }
+            }
+
             GUILayout.BeginHorizontal();
             PackerButton("Build Mod", mod => { mod.Build(HoohTools.GameExportPath); });
             PackerButton("Test Mod", mod => { mod.Build(HoohTools.GameExportPath, true); });
@@ -103,7 +117,7 @@ namespace ModPackerModule.Utility.Inspector
                         xmlSmallCategoryField.intValue);
                     mod.Save(true);
                 });
-            PackerButton("Add Current Scene to Studio Map", mod => mod.CreateItemThumbnails());
+            PackerButton("As Studio Scenes", mod => mod.CreateItemThumbnails());
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             PackerCharacterButton("As Clothing Items", _dropDownItems);
