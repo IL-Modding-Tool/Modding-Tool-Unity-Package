@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Common;
 using UnityEditor;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace hooh_ModdingTool.asm_Packer.Editor
             public GenericMenu.MenuFunction2 Callback;
             public object Parameter;
         }
+
         public static void Button(string text, Action callback)
         {
             if (!GUILayout.Button(text, Style.Button)) return;
@@ -47,13 +49,26 @@ namespace hooh_ModdingTool.asm_Packer.Editor
 
         public static void Dropdown(string title, IEnumerable<DropDownItem> items)
         {
-            if (!EditorGUILayout.DropdownButton(new GUIContent(title), FocusType.Passive, EditorStyles.toolbarDropDown)) return;
+            if (!EditorGUILayout.DropdownButton(new GUIContent(title), FocusType.Passive,
+                EditorStyles.toolbarDropDown)) return;
             var menu = new GenericMenu();
             foreach (var item in items)
             {
                 menu.AddItem(new GUIContent(item.Name), item.On, item.Callback, item.Parameter);
             }
+
             menu.ShowAsContext();
+        }
+
+        public static void PlayClip(string soundType)
+        {
+            var clip = Resources.Load<AudioClip>($"Sounds/{soundType}");
+            if (ReferenceEquals(null, clip)) return;
+            Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+            Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+            MethodInfo method = audioUtilClass.GetMethod("PlayClip", BindingFlags.Static | BindingFlags.Public, null,
+                new System.Type[] {typeof(AudioClip)}, null);
+            method?.Invoke(null, new object[] {clip});
         }
     }
 }

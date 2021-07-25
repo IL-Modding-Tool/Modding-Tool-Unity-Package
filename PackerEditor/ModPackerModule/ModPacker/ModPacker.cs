@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Media;
+using hooh_ModdingTool.asm_Packer.Editor;
 using ModPackerModule.Structure.SideloaderMod;
 using ModPackerModule.Utility;
 using MyBox;
@@ -17,7 +18,7 @@ namespace ModPackerModule
         public static void Announce(bool isSuccess = true, string message = "Please check the console the see error.")
         {
             if (!isSuccess) return;
-            EditorApplication.Beep();
+            WindowUtility.PlayClip("good");
             if (EditorUtility.DisplayDialog("Alert", "Build Successful!", "Open Folder", "Okay"))
                 PathUtils.OpenPath(HoohTools.GameExportPath);
 
@@ -68,7 +69,7 @@ namespace ModPackerModule
                 if (BuildPipeline.isBuildingPlayer || EditorApplication.isCompiling ||
                     EditorApplication.isPlayingOrWillChangePlaymode) return;
 
-                SystemSounds.Exclamation.Play();
+                WindowUtility.PlayClip("warning");
                 EditorUtility.DisplayDialog("Error!",
                     "An error occured while the tool is building the mod.\nCheck console for more detailed information.",
                     "Dismiss");
@@ -96,7 +97,7 @@ namespace ModPackerModule
                 Progress();
             });
             EditorUtility.ClearProgressBar();
-            EditorApplication.Beep();
+            WindowUtility.PlayClip("good");
         }
 #endif
     }

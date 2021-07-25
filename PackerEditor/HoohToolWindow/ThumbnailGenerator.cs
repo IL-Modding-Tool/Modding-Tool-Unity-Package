@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using hooh_ModdingTool.asm_Packer.Editor;
 using ModPackerModule.Structure.SideloaderMod;
 using ModPackerModule.Utility;
 using nQuant;
@@ -10,9 +11,9 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Color = UnityEngine.Color;
 using Object = UnityEngine.Object;
-
 #if UNITY_EDITOR
 using Style = Common.HoohWindowStyles;
+
 public partial class HoohTools
 {
     public bool foldThumbnailGenerator = true;
@@ -112,7 +113,7 @@ public partial class HoohTools
                 EditorUtility.DisplayProgressBar("Generating", "Generating the image...", ++index / (float) total);
             }
 
-            EditorApplication.Beep();
+            WindowUtility.PlayClip("good");
         }
         catch (Exception e)
         {
@@ -155,7 +156,7 @@ public partial class HoohTools
                 EditorUtility.DisplayProgressBar("Generating", "Generating the image...", ++index / (float) total);
             }
 
-            EditorApplication.Beep();
+            WindowUtility.PlayClip("perfect");
         }
         catch (Exception e)
         {
@@ -176,7 +177,7 @@ public partial class HoohTools
         var thumbnailTargetPath = Path.Combine(assetPath, "thumbs");
         if (!Directory.Exists(thumbnailTargetPath)) Directory.CreateDirectory(thumbnailTargetPath);
         SetupThumbnailGenerator();
-        
+
         EditorUtility.DisplayProgressBar("Generating", "Generating and Compressing the image...", 0);
         var studioInfoThumbnailTargets = sideloaderMod.StudioThumbnailTargets.ToArray();
         var total = studioInfoThumbnailTargets.Length;
@@ -190,7 +191,7 @@ public partial class HoohTools
 
         EditorUtility.DisplayProgressBar("Generating", "Generating and Compressing the image...",
             ++index / (float) total);
-        EditorApplication.Beep();
+        WindowUtility.PlayClip("good");
     }
 
     private void GenerateStudioThumbnail()
@@ -219,7 +220,7 @@ public partial class HoohTools
                     ++index / (float) total);
             }
 
-            EditorApplication.Beep();
+            WindowUtility.PlayClip("good");
         }
         catch (Exception e)
         {

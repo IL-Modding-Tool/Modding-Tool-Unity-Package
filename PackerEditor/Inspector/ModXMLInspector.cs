@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Media;
 using Common;
 using hooh_ModdingTool.asm_Packer.Editor;
 using ModPackerModule.Structure.SideloaderMod;
@@ -74,7 +75,21 @@ namespace ModPackerModule.Utility.Inspector
                         {
                             var check = isValid || EditorUtility.DisplayDialog("Are you sure?",
                                 "This XML is not valid. Are you sure that you want to continue?", "Yes", "No");
-                            if (check) mod.Build(gameExportPath);
+                            if (!check) return;
+                            if (mod.Build(gameExportPath))
+                            {
+                                WindowUtility.PlayClip("good");
+                            }
+                            else
+                            {
+                                if (BuildPipeline.isBuildingPlayer || EditorApplication.isCompiling ||
+                                    EditorApplication.isPlayingOrWillChangePlaymode) return;
+
+                                WindowUtility.PlayClip("warning");
+                                EditorUtility.DisplayDialog("Error!",
+                                    "An error occured while the tool is building the mod.\nCheck console for more detailed information.",
+                                    "Dismiss");
+                            }
                         });
                         GUI.backgroundColor = Color.white;
                         PackerButton("Test Mod", mod => { mod.Build(gameExportPath, true); });

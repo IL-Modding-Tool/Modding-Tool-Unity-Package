@@ -48,7 +48,7 @@ public partial class HoohTools
     {
         if (TemplateModName.IsNullOrEmpty())
         {
-            EditorApplication.Beep();
+            WindowUtility.PlayClip("warning");
             EditorUtility.DisplayDialog("Error", "You need to provide valid Mod Name to create mod context folder.",
                 "Ok");
             return;
@@ -56,7 +56,7 @@ public partial class HoohTools
 
         if (TemplateModGUID.IsNullOrEmpty())
         {
-            EditorApplication.Beep();
+            WindowUtility.PlayClip("warning");
             EditorUtility.DisplayDialog("Error",
                 "You need to provide valid Mod GUID Name to create mod context folder. The mod GUID should not be same with other mod's GUID in order to prevent conflict between the mods.",
                 "Ok");

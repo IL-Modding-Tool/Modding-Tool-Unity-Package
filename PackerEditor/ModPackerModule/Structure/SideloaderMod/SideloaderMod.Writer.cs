@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using hooh_ModdingTool.asm_Packer.Editor;
 using hooh_ModdingTool.asm_Packer.Utility;
 using LoremNET;
 using ModPackerModule.Utility;
@@ -118,7 +119,7 @@ namespace ModPackerModule.Structure.SideloaderMod
         public void CommonWriterExceptionHandler(Exception e)
         {
             Debug.LogError(e);
-            EditorApplication.Beep();
+            WindowUtility.PlayClip("warning");
             EditorUtility.DisplayDialog("Error",
                 "An error has occured while writing selected items into the sxml file.\n" +
                 "Please file a report to the Modding Tool Repository if you think this is a bug.", "Hmmm");
@@ -151,7 +152,7 @@ namespace ModPackerModule.Structure.SideloaderMod
                 foreach (var o in objects)
                     WriteStudioItem(in itemList, in existingItems, o, bigCategory, midCategory);
                 Debug.Log($"Successfully wrote {objects.Length} Studio Item(s) to the this mod xml file.");
-                EditorApplication.Beep();
+                WindowUtility.PlayClip("good");
             });
         }
 
@@ -174,7 +175,7 @@ namespace ModPackerModule.Structure.SideloaderMod
                 foreach (var o in objects)
                     WriteCharacterItem(in itemList, in existingItems, in o);
                 Debug.Log($"Successfully wrote {objects.Length} Studio Item(s) to the this mod xml file.");
-                EditorApplication.Beep();
+                WindowUtility.PlayClip("good");
             });
         }
 
