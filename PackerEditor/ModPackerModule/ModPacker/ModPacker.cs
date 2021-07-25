@@ -24,13 +24,13 @@ namespace ModPackerModule
             else EditorUtility.DisplayDialog("FAILED!", message, "Dismiss");
         }
 
-        public static TextAsset[] GetProjectDirectoryTextAssets()
+        public static SideloaderMod[] GetProjectDirectoryTextAssets()
         {
-            return PathUtils.LoadAssetsFromDirectory<TextAsset>(PathUtils.GetProjectPath(), ".xml$");
+            return PathUtils.LoadAssetsFromDirectory<SideloaderMod>(PathUtils.GetProjectPath(), ".xml$");
         }
 
 
-        public static void PackMod(List<TextAsset> assets, string exportGamePath, bool isDryRun = false)
+        public static void PackMod(List<SideloaderMod> assets, string exportGamePath, bool isDryRun = false)
         {
             if (!Directory.Exists(exportGamePath))
             {
@@ -53,21 +53,7 @@ namespace ModPackerModule
                 return;
             }
 
-            List<SideloaderMod> packingMods;
-            try
-            {
-                packingMods = assets.Select(file => ScriptableObject.CreateInstance<SideloaderMod>()).ToList();
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                SystemSounds.Exclamation.Play();
-                EditorUtility.DisplayDialog("Error!",
-                    "Failed to parse bundle information.\nCheck console for more detailed information.", "YES");
-                throw new Exception("Failed to validate mods");
-            }
-
-            var total = packingMods.Count;
+            var total = assets.Count;
             var done = 0;
 
             void Progress()
@@ -89,11 +75,11 @@ namespace ModPackerModule
             }
 
             Progress();
-            packingMods.ForEach(mod =>
+            assets.ForEach(mod =>
             {
                 try
                 {
-                    if (!mod.IsValid()) Debug.LogError("The XML file is not valid!");
+                    if (mod == null) Debug.LogError("The XML file does not exists!");
                     else if (!mod.Build(exportGamePath, isDryRun)) BuildFailed();
                 }
                 catch (Exception e)

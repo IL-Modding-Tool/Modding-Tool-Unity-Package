@@ -58,25 +58,37 @@ namespace ModPackerModule.Utility.Inspector
                 }
 
                 var isValid = t.Issues.Count <= 0;
-                GUILayout.BeginHorizontal();
-                GUI.backgroundColor = isValid ? HoohWindowStyles.green : HoohWindowStyles.red;
-                PackerButton("Build Mod", mod =>
+                var gameExportPath = HoohTools.GameExportPath;
+
+                using (new GUILayout.HorizontalScope())
                 {
-                    var check = isValid || EditorUtility.DisplayDialog("Are you sure?",
-                        "This XML is not valid. Are you sure that you want to continue?", "Yes", "No");
-                    if (check) mod.Build(HoohTools.GameExportPath);
-                });
-                GUI.backgroundColor = Color.white;
-                PackerButton("Test Mod", mod => { mod.Build(HoohTools.GameExportPath, true); });
-                GUILayout.EndHorizontal();
+                    EditorPrefs.SetString("hoohTool_exportPath",
+                        EditorGUILayout.TextField("Output Directory: ", HoohTools.GameExportPath));
+                    HoohTools.GameExportPath = EditorPrefs.GetString("hoohTool_exportPath");
+                }
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUI.backgroundColor = isValid ? HoohWindowStyles.green : HoohWindowStyles.red;
+                    PackerButton("Build Mod", mod =>
+                    {
+                        var check = isValid || EditorUtility.DisplayDialog("Are you sure?",
+                            "This XML is not valid. Are you sure that you want to continue?", "Yes", "No");
+                        if (check) mod.Build(gameExportPath);
+                    });
+                    GUI.backgroundColor = Color.white;
+                    PackerButton("Test Mod", mod => { mod.Build(gameExportPath, true); });
+                }
             }
 
             // -----------------------------------------------
             GUILayout.Label("Thumbnail Creation", HoohWindowStyles.Medium);
-            GUILayout.BeginHorizontal();
-            PackerButton("Studio", mod => mod.CreateStudioThumbnails());
-            PackerButton("Item", mod => mod.CreateItemThumbnails());
-            GUILayout.EndHorizontal();
+            using (new GUILayout.HorizontalScope())
+            {
+                PackerButton("Studio", mod => mod.CreateStudioThumbnails());
+                PackerButton("Item", mod => mod.CreateItemThumbnails());
+            }
+
             // -----------------------------------------------
             GUILayout.Label("Example Creation", HoohWindowStyles.Medium);
             EditorGUILayout.HelpBox(
@@ -84,24 +96,31 @@ namespace ModPackerModule.Utility.Inspector
                 "Which will invalidate this mod $xml file by the default. " +
                 "\n You will need to look inside of the file in order to make this mod sxml file valid after adding example file.",
                 MessageType.Warning);
-            GUILayout.BeginHorizontal();
-            PackerButton("Add Studio Example", mod =>
+
+            using (new GUILayout.HorizontalScope())
             {
-                var monkey = new TypingMonkey(in mod, mod.InputDocumentObject);
-                monkey.WriteCategory(true, 2020, "Example Big Category");
-                monkey.WriteCategory(false, 2020, "Example Mid Category", 1);
-                monkey.WriteStudioItem("example", "Example Item", 2020, 1);
-                monkey.Update();
-            });
-            PackerCharacterButton("Add Clothing Example", _dropDownExampleItems);
-            PackerCharacterButton("Add Character Example", _dropDownExampleItems);
-            GUILayout.EndHorizontal();
-            PackerButton("Add Studio Map Example", mod =>
+                PackerButton("Add Studio Example", mod =>
+                {
+                    var monkey = new TypingMonkey(in mod, mod.InputDocumentObject);
+                    monkey.WriteCategory(true, 2020, "Example Big Category");
+                    monkey.WriteCategory(false, 2020, "Example Mid Category", 1);
+                    monkey.WriteStudioItem("example", "Example Item", 2020, 1);
+                    monkey.Update();
+                });
+                PackerButton("Add Studio Map Example", mod =>
+                {
+                    var monkey = new TypingMonkey(in mod, mod.InputDocumentObject);
+                    monkey.WriteStudioMap("example", "example");
+                    monkey.Update();
+                });
+            }
+
+            using (new GUILayout.HorizontalScope())
             {
-                var monkey = new TypingMonkey(in mod, mod.InputDocumentObject);
-                monkey.WriteStudioMap("example", "example");
-                monkey.Update();
-            });
+                PackerCharacterButton("Add Clothing Example", _dropDownExampleItems);
+                PackerCharacterButton("Add Character Example", _dropDownExampleItems);
+            }
+
             // -----------------------------------------------
             GUILayout.Label("Item Registration from Selection", HoohWindowStyles.Medium);
             if (!ActiveEditorTracker.sharedTracker.isLocked)
@@ -123,34 +142,41 @@ namespace ModPackerModule.Utility.Inspector
                           && Selection.activeObject != assetTarget;
 
 
-            GUILayout.BeginHorizontal();
             var xmlBigCategoryField = serializedObject.FindProperty("xmlBigCategory");
             var xmlSmallCategoryField = serializedObject.FindProperty("xmlSmallCategory");
-            var l = EditorGUIUtility.labelWidth;
-            EditorGUIUtility.labelWidth = 150;
-            EditorGUILayout.PropertyField(xmlBigCategoryField, new GUIContent("Big Category"));
-            EditorGUILayout.PropertyField(xmlSmallCategoryField, new GUIContent("Mid Category"));
-            EditorGUIUtility.labelWidth = l;
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            PackerButton("As Studio Items",
-                mod =>
+
+            using (new GUILayout.HorizontalScope())
+            {
+                var l = EditorGUIUtility.labelWidth;
+                EditorGUIUtility.labelWidth = 150;
+                EditorGUILayout.PropertyField(xmlBigCategoryField, new GUIContent("Big Category"));
+                EditorGUILayout.PropertyField(xmlSmallCategoryField, new GUIContent("Mid Category"));
+                EditorGUIUtility.labelWidth = l;
+            }
+
+            using (new GUILayout.HorizontalScope())
+            {
+                PackerButton("As Studio Items",
+                    mod =>
+                    {
+                        mod.UpsertStudioItems(SelectedPrefabs, xmlBigCategoryField.intValue,
+                            xmlSmallCategoryField.intValue);
+                        mod.Save(true);
+                    });
+                PackerButton("As Studio Scenes", mod =>
                 {
-                    mod.UpsertStudioItems(SelectedPrefabs, xmlBigCategoryField.intValue,
-                        xmlSmallCategoryField.intValue);
+                    mod.InsertStudioMaps(SelectedScenes);
                     mod.Save(true);
                 });
-            PackerButton("As Studio Scenes", mod =>
+            }
+
+            using (new GUILayout.HorizontalScope())
             {
-                mod.InsertStudioMaps(SelectedScenes);
-                mod.Save(true);
-            });
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            // PackerCharacterButton("As Clothing Items", _dropDownItems);
-            // PackerCharacterButton("As Character Items", _dropDownItems);
-            GUI.enabled = true;
-            GUILayout.EndHorizontal();
+                // PackerCharacterButton("As Clothing Items", _dropDownItems);
+                // PackerCharacterButton("As Character Items", _dropDownItems);
+                GUI.enabled = true;
+            }
+
             // -----------------------------------------------
             GUILayout.EndVertical();
 
@@ -173,7 +199,7 @@ namespace ModPackerModule.Utility.Inspector
             {
                 if (!(assetTarget is SideloaderMod t)) return;
                 if (!(userdata is object[] parameters)) return;
-                
+
                 var key = parameters[0] as string;
                 var monkey = new TypingMonkey(in t, t.InputDocumentObject);
                 monkey.WriteCharacterClothing(key, "example", "example");

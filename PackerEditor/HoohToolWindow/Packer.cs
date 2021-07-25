@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Common;
 using ModPackerModule;
+using ModPackerModule.Structure.SideloaderMod;
 using MyBox;
 using UnityEditor;
 using UnityEngine;
@@ -13,7 +14,7 @@ using UnityEngine;
 public partial class HoohTools
 {
     [SerializeField]
-    public List<TextAsset> packingObjects;
+    public List<SideloaderMod> packingObjects;
 
     public void DrawModBuilder(SerializedObject serializedObject)
     {

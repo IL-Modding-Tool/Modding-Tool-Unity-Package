@@ -188,11 +188,18 @@ namespace ModPackerModule.Structure.SideloaderMod
 
         public bool IsValid()
         {
-            var root = InputDocumentObject.Root;
+            var root = InputDocumentObject?.Root;
+            if (ReferenceEquals(null, root))
+            {
+                LoadFromContext(AssetDatabase.GetAssetPath(this));
+            }
+            
+            root = InputDocumentObject?.Root;
             if (ReferenceEquals(null, root))
             {
                 Issues.Add(new Issue(Issue.IssueLevel.Fatal, Issue.IssueType.XMLFormat,
-                    "Cannot find document root from the file", "Make sure that the file contains corrent XML data."));
+                    "Cannot find document root from the file",
+                    "Make sure that the file contains corrent XML data."));
                 return false;
             }
 

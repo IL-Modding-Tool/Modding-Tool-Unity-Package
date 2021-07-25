@@ -227,6 +227,7 @@ namespace ModPackerModule.Structure.SideloaderMod
 
         public bool Build(string targetPath, bool isDryRun = false)
         {
+            if (!IsValid()) Debug.LogError("The XML file is not valid!");
             GenerateDynamicItems();
             if (BuildAssetBundles(isDryRun) == false) return false;
             // swap materials
