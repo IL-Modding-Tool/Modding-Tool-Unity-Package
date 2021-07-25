@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
 using hooh_ModdingTool.asm_Packer.Utility;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ModPackerModule.Structure.SideloaderMod
 {
@@ -30,6 +32,19 @@ namespace ModPackerModule.Structure.SideloaderMod
                     new XAttribute("big-category", bigCategory)
                 ));
             }
+        }
+
+        protected void WriteStudioMap(in XElement studioItemList, in Dictionary<string, XElement> existingItems,
+            SceneAsset scene)
+        {
+            var gameObjectName = scene.name;
+            var prettyName = CommonUtils.Prettify(gameObjectName);
+
+            if (!existingItems.ContainsKey(gameObjectName))
+                studioItemList.Add(new XElement("item",
+                    new XAttribute("scene", gameObjectName),
+                    new XAttribute("name", prettyName)
+                ));
         }
     }
 }

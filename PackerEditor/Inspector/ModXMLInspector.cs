@@ -7,6 +7,7 @@ using MyBox;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ModPackerModule.Utility.Inspector
 {
@@ -117,7 +118,11 @@ namespace ModPackerModule.Utility.Inspector
                         xmlSmallCategoryField.intValue);
                     mod.Save(true);
                 });
-            PackerButton("As Studio Scenes", mod => mod.CreateItemThumbnails());
+            PackerButton("As Studio Scenes", mod =>
+            {
+                mod.InsertStudioMaps(SelectedScenes);
+                mod.Save(true);
+            });
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             PackerCharacterButton("As Clothing Items", _dropDownItems);
@@ -134,6 +139,8 @@ namespace ModPackerModule.Utility.Inspector
 
         private GameObject[] SelectedPrefabs => Selection.objects.OfType<GameObject>()
             .Where(PrefabUtility.IsPartOfAnyPrefab).ToArray();
+
+        private SceneAsset[] SelectedScenes => Selection.objects.OfType<SceneAsset>().ToArray();
 
         private static WindowUtility.DropDownItem[] _dropDownItems;
 
@@ -165,6 +172,8 @@ namespace ModPackerModule.Utility.Inspector
         {
             if (!GUILayout.Button(buttonName)) return;
             if (!(assetTarget is SideloaderMod t)) return;
+            if (!(target is XMLImporter xmlImporter)) return;
+            t.LoadFromContext(xmlImporter.assetPath);
             callback?.Invoke(t);
         }
     }

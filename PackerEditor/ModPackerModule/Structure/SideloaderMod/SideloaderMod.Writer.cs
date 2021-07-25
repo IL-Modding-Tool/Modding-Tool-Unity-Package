@@ -10,6 +10,7 @@ using ModPackerModule.Utility;
 using MyBox;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ModPackerModule.Structure.SideloaderMod
 {
@@ -179,32 +180,44 @@ namespace ModPackerModule.Structure.SideloaderMod
         }
 
 
-        public Dictionary<string, XElement> GetItemsByAsset(in XElement root)
+        public void CommonUpsertItems(string key, Action<XElement, Dictionary<string, XElement>> callback,
+            string assetKey = "object", string elementName = "item")
         {
-            return root.Elements("item")
-                .Where(x => x.Attribute("object") != null)
-                .ToDictionary(x => x.Attr("object"), x => x);
-        }
-
-        public void UpsertStudioItems(GameObject[] gameObjects, int bigCategory = 0, int midCategory = 0)
-        {
-            // I really don't like the performance here, There must be the way to unfuck this mess.
             try
             {
-                if (!ValidatePrefabWriter(in gameObjects)) return;
-                if (!TryGetListElement("studioitem", out var studioItemList)) return;
-
-                var existingItems = GetItemsByAsset(studioItemList);
-                foreach (var gameObject in gameObjects)
-                    WriteStudioItem(in studioItemList, in existingItems, gameObject, bigCategory, midCategory);
-
-                Debug.Log($"Successfully wrote {gameObjects.Length} item(s) to the this mod xml file.");
-                EditorApplication.Beep();
+                if (!TryGetListElement(key, out var itemList)) return;
+                var existingItems = itemList.Elements(elementName)
+                    .Where(x => x.Attribute(assetKey) != null)
+                    .ToDictionary(x => x.Attr(assetKey), x => x);
+                callback?.Invoke(itemList, existingItems);
             }
             catch (Exception e)
             {
                 CommonWriterExceptionHandler(e);
             }
+        }
+
+        public void UpsertStudioItems(in GameObject[] gameObjects, int bigCategory = 0, int midCategory = 0)
+        {
+            var objects = gameObjects;
+            if (!ValidatePrefabWriter(in gameObjects)) return;
+            CommonUpsertItems("studioitem", (itemList, existingItems) =>
+            {
+                foreach (var o in objects)
+                    WriteStudioItem(in itemList, in existingItems, o, bigCategory, midCategory);
+                Debug.Log($"Successfully wrote {objects.Length} Studio Item(s) to the this mod xml file.");
+                EditorApplication.Beep();
+            });
+        }
+
+        public void InsertStudioMaps(in SceneAsset[] scenes)
+        {
+            var objects = scenes;
+            CommonUpsertItems("map", (itemList, existingItems) =>
+            {
+                foreach (var o in objects)
+                    WriteStudioMap(in itemList, in existingItems, o);
+            }, "scene");
         }
 
         public void Save(bool sayNoToExtension = false)
