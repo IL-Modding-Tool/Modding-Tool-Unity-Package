@@ -1,36 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using hooh_ModdingTool.asm_Packer.Editor;
+using hooh_ModdingTool.asm_Packer.Utility;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 public partial class HoohTools
 {
     public enum Command
     {
-        Hair,
-        Clothing,
-        Accessory,
-        AccessoryWithTransform,
-        AccessorySkinned,
-        StudioItem,
-        HS2Map = 10,
-        AIMap = 20,
-        AIFurniture,
-        FemaleClothing = 100,
-        FemaleTop,
-        RemoveAll = 999
+        Hair, Clothing, Accessory, AccessoryWithTransform, AccessorySkinned,
+        StudioItem, HS2Map = 10, AIMap = 20, AIFurniture, FemaleClothing = 100,
+        FemaleTop, RemoveAll = 999
     }
 
-    public void DrawModSetup(SerializedObject serializedObject)
+    private static void DrawModSetup()
     {
         WindowUtility.VerticalLayout(() =>
         {
-            WindowUtility.Button("Initialize HS2 Map", () =>
-            {
-                InitializeObject(Command.HS2Map);
-            });
+            WindowUtility.Button("Initialize HS2 Map", () => { InitializeObject(Command.HS2Map); });
         });
 
         WindowUtility.VerticalLayout(() =>
@@ -88,64 +77,33 @@ public partial class HoohTools
         });
     }
 
-    public static void CallHelper(string functionName, params object[] parameters) => CallFromEditor("AIObjectHelper", functionName, parameters);
-    public static void MapHelper(string functionName, params object[] parameters) => CallFromEditor("MapInitializer", functionName, parameters);
+    private static void CallHelper(string functionName, params object[] parameters) =>
+        MainAssemblyInterface.AIObjectHelper.InvokeStaticMethod(functionName, parameters);
 
-    public static void CallFromEditor(string className, string functionName, params object[] parameters)
-    {
-        
-        var type = Type.GetType($"{className}, Assembly-CSharp-Editor");
-        if (ReferenceEquals(null, type))
-            throw new NullReferenceException("Failed to find MapInitializer in Unity Editor.");
-        var method = type.GetMethod(functionName);
-        if (ReferenceEquals(null, method))
-            throw new NullReferenceException($"Failed to find method {functionName}");
-        method.Invoke(null, parameters);
-    }
+    private static void MapHelper(string functionName, params object[] parameters) =>
+        MainAssemblyInterface.MapInitializer.InvokeStaticMethod(functionName, parameters);
 
-    public static void InitializeObject(object _command)
-    {
-        var command = (Command) _command;
-
-        foreach (var o in Selection.gameObjects.Select(x => x.GetComponent<Transform>()))
+    private static readonly Dictionary<Command, Action<GameObject>> CommandDictionary =
+        new Dictionary<Command, Action<GameObject>>
         {
-            var transform = (Transform) o;
+            {Command.Hair, o => CallHelper("InitializeHair", o)},
+            {Command.Clothing, o => CallHelper("InitializeClothes", o)},
+            {Command.Accessory, o => CallHelper("InitializeAccessory", o, false)},
+            {Command.AccessorySkinned, o => CallHelper("InitializeSkinnedAccessory", o)},
+            {Command.StudioItem, o => CallHelper("InitializeItem", o)},
+            {Command.AIFurniture, o => CallHelper("InitializeFurniture", o)},
+            {Command.RemoveAll, o => CallHelper("RemoveAllModRelatedObjects", o)},
+            {Command.AIMap, o => MapHelper("InitializeAIMap")},
+            {Command.HS2Map, o => MapHelper("InitializeHS2Map")}
+        };
 
-            switch (command)
-            {
-                case Command.Hair:
-                    CallHelper("InitializeHair", transform.gameObject);
-                    break;
-                case Command.Clothing:
-                    CallHelper("InitializeClothes", transform.gameObject);
-                    break;
-                case Command.Accessory:
-                    CallHelper("InitializeAccessory", transform.gameObject, false);
-                    break;
-                case Command.AccessoryWithTransform:
-                    CallHelper("InitializeAccessory", transform.gameObject, true);
-                    break;
-                case Command.AccessorySkinned:
-                    CallHelper("InitializeSkinnedAccessory", transform.gameObject);
-                    break;
-                case Command.StudioItem:
-                    CallHelper("InitializeItem", transform.gameObject);
-                    break;
-                case Command.AIFurniture:
-                    CallHelper("InitializeFurniture", transform.gameObject);
-                    break;
-                case Command.RemoveAll:
-                    CallHelper("RemoveAllModRelatedObjects", transform.gameObject);
-                    break;
-                case Command.AIMap:
-                    MapHelper("InitializeAIMap");
-                    break;
-                case Command.HS2Map:
-                    MapHelper("InitializeHS2Map");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+    private static void InitializeObject(object commandObject)
+    {
+        if (!(commandObject is Command command)) return;
+        foreach (var o in Selection.gameObjects.Where(PrefabUtility.IsPartOfPrefabInstance))
+        {
+            if (CommandDictionary.TryGetValue(command, out var callback)) callback?.Invoke(o);
+            else Debug.LogError("The fuck just happened?");
         }
     }
 }

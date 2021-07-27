@@ -63,7 +63,10 @@ namespace hooh_ModdingTool.asm_Packer.Utility
         {
             try
             {
-                instance.GetType().GetField(key, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(instance, value);
+                instance.GetType()
+                    .GetField(key,
+                        BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                    ?.SetValue(instance, value);
             }
             catch (Exception e)
             {
@@ -75,6 +78,16 @@ namespace hooh_ModdingTool.asm_Packer.Utility
         public static void InvokeMethod(this object instance, string methodName, params object[] parameters)
         {
             instance.GetType().GetMethod(methodName)?.Invoke(instance, parameters);
+        }
+
+        public static void InvokeMethod<T>(this T instance, string methodName, params object[] parameters)
+        {
+            typeof(T).GetMethod(methodName)?.Invoke(instance, parameters);
+        }
+
+        public static void InvokeStaticMethod(this Type instance, string methodName, params object[] parameters)
+        {
+            instance.GetMethod(methodName)?.Invoke(instance, parameters);
         }
     }
 }

@@ -124,7 +124,7 @@ public partial class HoohTools : EditorWindow
             switch (TabSelector)
             {
                 case MenuMode.ModSetup:
-                    DrawModSetup(serializedObject);
+                    DrawModSetup();
                     DrawXMLGenerator(serializedObject);
                     break;
                 case MenuMode.ModIntegration:
