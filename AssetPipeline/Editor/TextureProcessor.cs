@@ -12,8 +12,12 @@ namespace AssetPipeline.Editor
 
         private void OnPreprocessTexture()
         {
-            var directoryName = (Path.GetDirectoryName(assetPath) ?? string.Empty);
+            if (string.IsNullOrEmpty(assetPath)) return;
             if (!(assetImporter is TextureImporter textureImporter)) return;
+            var directoryName = (Path.GetDirectoryName(assetPath) ?? string.Empty);
+            var fileName = (Path.GetFileNameWithoutExtension(assetPath));
+
+            // Textures
             if (directoryName.EndsWith("thumbs"))
             {
                 if (!assetPath.EndsWith(".png")) return;
@@ -24,6 +28,7 @@ namespace AssetPipeline.Editor
                 textureImporter.maxTextureSize = 128;
                 textureImporter.textureCompression = TextureImporterCompression.CompressedLQ;
                 textureImporter.wrapMode = TextureWrapMode.Clamp;
+                return;
             }
             else if (directoryName.EndsWith("frames"))
             {
@@ -35,6 +40,19 @@ namespace AssetPipeline.Editor
                 textureImporter.maxTextureSize = 128;
                 textureImporter.textureCompression = TextureImporterCompression.Uncompressed;
                 textureImporter.wrapMode = TextureWrapMode.Clamp;
+                return;
+            }
+            else if (fileName.EndsWith("bodymask"))
+            {
+                // do not - with it.
+                textureImporter.textureType = TextureImporterType.Default;
+                textureImporter.textureShape = TextureImporterShape.Texture2D;
+                textureImporter.sRGBTexture = false;
+                textureImporter.mipmapEnabled = false;
+                textureImporter.alphaIsTransparency = false;
+                textureImporter.textureCompression = TextureImporterCompression.CompressedHQ;
+                textureImporter.wrapMode = TextureWrapMode.Clamp;
+                // Bodymask
             }
         }
     }
