@@ -14,10 +14,7 @@ namespace ModPackerModule.Utility.Inspector
     [CustomEditor(typeof(XMLImporter))]
     public class ModXMLInspector : ScriptedImporterEditor
     {
-        protected override bool useAssetDrawPreview
-        {
-            get => false;
-        }
+        protected override bool useAssetDrawPreview => false;
 
         public override void OnInspectorGUI()
         {
@@ -120,17 +117,17 @@ namespace ModPackerModule.Utility.Inspector
                 {
                     PackerButton("Add Studio Example", mod =>
                     {
-                        var monkey = new TypingMonkey(in mod, mod.InputDocumentObject);
-                        monkey.WriteCategory(true, 2020, "Example Big Category");
-                        monkey.WriteCategory(false, 2020, "Example Mid Category", 1);
-                        monkey.WriteStudioItem("example", "Example Item", 2020, 1);
-                        monkey.Update();
+                        var newDocument = new TypingMonkey(in mod, mod.InputDocumentObject);
+                        newDocument.WriteCategory(true, 2020, "Example Big Category");
+                        newDocument.WriteCategory(false, 2020, "Example Mid Category", 1);
+                        newDocument.WriteStudioItem("example", "Example Item", 2020, 1);
+                        newDocument.Update();
                     });
                     PackerButton("Add Studio Map Example", mod =>
                     {
-                        var monkey = new TypingMonkey(in mod, mod.InputDocumentObject);
-                        monkey.WriteStudioMap("example", "example");
-                        monkey.Update();
+                        var newDocument = new TypingMonkey(in mod, mod.InputDocumentObject);
+                        newDocument.WriteStudioMap("example", "example");
+                        newDocument.Update();
                     });
                 }
 
