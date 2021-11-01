@@ -10,6 +10,7 @@ namespace hooh_ModdingTool.asm_Packer.Editor
     {
         public static readonly Type AIObjectHelper;
         public static readonly Type MapInitializer;
+        public static readonly Type DynamicBonePreset;
 
         static MainAssemblyInterface()
         {
@@ -17,11 +18,15 @@ namespace hooh_ModdingTool.asm_Packer.Editor
                 .SelectMany(x => x.GetTypes())
                 .Select(x => (x.Name, x.Assembly, x))
                 .Where(x => x.Item2.FullName.Contains("Assembly-CSharp"));
+            
 
             foreach (var (a, _, c) in fullTypeEnumerator)
             {
                 switch (a)
                 {
+                    case "Presets":
+                        DynamicBonePreset = c;
+                        break;
                     case "AIObjectHelper":
                         AIObjectHelper = c;
                         break;

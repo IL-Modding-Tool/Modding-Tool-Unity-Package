@@ -1,20 +1,23 @@
-﻿#pragma warning disable 618
+﻿using System;
+using Object = UnityEngine.Object;
+#pragma warning disable 618
 using System.IO;
 using System.Linq;
 using ModPackerModule.Utility;
 using UnityEditor;
 using UnityEngine;
-
 #pragma warning restore 618
 
 #if UNITY_EDITOR
-
-
+using hooh_ModdingTool.asm_Packer.Editor;
+using UnityEngine.SceneManagement;
 using Style = Common.HoohWindowStyles;
+
 public partial class HoohTools
 {
     private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
     private static readonly int MainTex = Shader.PropertyToID("_MainTex");
+    private int selectedPresetIndex = 0;
 
     private void DrawUnityUtility(SerializedObject serializedObject)
     {
@@ -22,128 +25,197 @@ public partial class HoohTools
         if (!foldoutMacros) return;
 
         // Starts a horizontal group
-        GUILayout.BeginHorizontal("box");
-        GUILayout.BeginVertical();
-        Gap = EditorGUILayout.IntField("Showcase Gap: ", Gap);
-        Cols = EditorGUILayout.IntField("Showcase Columns: ", Cols);
-        GUILayout.EndVertical();
-        if (GUILayout.Button("Showcase Mode", Style.Button))
-            if (CheckGoodSelection())
-                _guiEventAction = ShowcaseMode;
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(5);
-        GUILayout.BeginVertical("box");
-        GUILayout.Label("Easy Macros", Style.Header);
-        if (GUILayout.Button("Wrap Object with new GameObject and Scale", Style.Button))
-            if (CheckGoodSelection())
-                _guiEventAction = WrapObjectScale;
-        if (GUILayout.Button("Wrap Object with new GameObject", Style.Button))
-            if (CheckGoodSelection())
-                _guiEventAction = WrapObject;
-        if (GUILayout.Button("Create Prefab from Selected Objects", Style.Button))
-            if (CheckGoodSelection())
-                _guiEventAction = CreatePrefab;
-        GUILayout.EndVertical();
-
-
-        GUILayout.Space(5);
-        GUILayout.BeginVertical("box");
-        LightScaleSize = EditorGUILayout.FloatField("Light Scale Size: ", LightScaleSize);
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Scale Lights and Probes", Style.Button))
-            if (CheckGoodSelection())
-                _guiEventAction = ScaleLightsAndProbes;
-        if (GUILayout.Button("Reset Lightmap Scale", Style.Button))
-            _guiEventAction = () =>
+        using (new GUILayout.HorizontalScope("box"))
+        {
+            using (new GUILayout.VerticalScope())
             {
-                var meshes = Resources.FindObjectsOfTypeAll<MeshRenderer>();
-                foreach (var mesh in meshes)
-                {
-                    var so = new SerializedObject(mesh);
-                    so.FindProperty("m_ScaleInLightmap").floatValue = 1;
-                    so.ApplyModifiedProperties();
-                }
-            };
+                Gap = EditorGUILayout.IntField("Showcase Gap: ", Gap);
+                Cols = EditorGUILayout.IntField("Showcase Columns: ", Cols);
+            }
 
-        GUILayout.EndHorizontal();
-        GUILayout.EndVertical();
+            if (GUILayout.Button("Showcase Mode", Style.Button))
+                if (CheckGoodSelection())
+                    _guiEventAction = ShowcaseMode;
+        }
 
         GUILayout.Space(5);
-        GUILayout.BeginHorizontal("box");
-        targetObject = (GameObject) EditorGUILayout.ObjectField("Target Object", targetObject, typeof(GameObject), true);
-        if (GUILayout.Button("Move Selected to Clutter", Style.Button))
-            _guiEventAction = () =>
+
+        using (new GUILayout.VerticalScope("box"))
+        {
+            GUILayout.Label("Easy Macros", Style.Header);
+            if (GUILayout.Button("Wrap Object with new GameObject and Scale", Style.Button))
+                if (CheckGoodSelection())
+                    _guiEventAction = WrapObjectScale;
+            if (GUILayout.Button("Wrap Object with new GameObject", Style.Button))
+                if (CheckGoodSelection())
+                    _guiEventAction = WrapObject;
+            if (GUILayout.Button("Create Prefab from Selected Objects", Style.Button))
+                if (CheckGoodSelection())
+                    _guiEventAction = CreatePrefab;
+        }
+
+
+        GUILayout.Space(5);
+        using (new GUILayout.VerticalScope("box"))
+        {
+            LightScaleSize = EditorGUILayout.FloatField("Light Scale Size: ", LightScaleSize);
+
+            using (new GUILayout.HorizontalScope())
             {
-                if (!CheckGoodSelection()) return;
-                var clutter = targetObject != null ? targetObject : GameObject.Find("Clutters") ?? new GameObject("Clutters");
-
-                foreach (var select in Selection.objects)
-                {
-                    var currentObject = (GameObject) select;
-                    currentObject.transform.parent = clutter.transform;
-                }
-            };
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(5);
-        GUILayout.BeginVertical("box");
-        GUILayout.Label("Multi-Rename", Style.Header);
-        PrepostString = EditorGUILayout.TextField("Pre/Postfix Text", PrepostString);
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Add to Front", Style.Button) && CheckGoodSelection())
-            _guiEventAction = () => { UnityMacros.AddPrefixOnName(PrepostString); };
-        if (GUILayout.Button("Add to End", Style.Button) && CheckGoodSelection())
-            _guiEventAction = () => { UnityMacros.AddPostfixOnName(PrepostString); };
-        if (GUILayout.Button("Remove", Style.Button) && CheckGoodSelection())
-            _guiEventAction = () => { UnityMacros.ReplaceTextOfName(PrepostString, ""); };
-        if (GUILayout.Button("SetTo", Style.Button) && CheckGoodSelection())
-            _guiEventAction = () => { UnityMacros.SetName(PrepostString); };
-        if (GUILayout.Button("Sequence", Style.Button) && CheckGoodSelection())
-            _guiEventAction = () => { UnityMacros.SetNameSequence(PrepostString); };
-        GUILayout.EndHorizontal();
-        GUILayout.EndVertical();
-
-
-        GUILayout.Space(5);
-        GUILayout.BeginVertical("box");
-
-        if (GUILayout.Button("Auto-Generate Materials", Style.Button))
-            _guiEventAction = () =>
-            {
-                var targetPath = PathUtils.GetProjectPath();
-                var basePath = Path.Combine(Directory.GetCurrentDirectory(), targetPath);
-                var filesWithRegex = PathUtils.GetFilesWithRegex(basePath, @"\.(jpg|png|tif|tga)");
-                var normalizedFiles = filesWithRegex.ToDictionary(Path.GetFileNameWithoutExtension, x => x);
-                foreach (var file in filesWithRegex.Where(x => Path.GetFileName(x).StartsWith("ALB_")))
-                {
-                    var name = Path.GetFileNameWithoutExtension(file);
-                    var matPath = Path.Combine(basePath, $"{name}.mat");
-                    if (File.Exists(matPath)) File.Delete(matPath);
-                    var material = new Material(Shader.Find("Standard")) {color = Color.white};
-                    var diffuseTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(targetPath, Path.GetFileName(file)));
-                    material.SetTexture(MainTex, diffuseTexture);
-                    if (normalizedFiles.TryGetValue(name.Replace("ALB_", "NRM_"), out var normalPath))
+                if (GUILayout.Button("Scale Lights and Probes", Style.Button))
+                    if (CheckGoodSelection())
+                        _guiEventAction = ScaleLightsAndProbes;
+                if (GUILayout.Button("Reset Lightmap Scale", Style.Button))
+                    _guiEventAction = () =>
                     {
-                        var normalMapTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(targetPath, Path.GetFileName(normalPath)));
-                        material.SetTexture(BumpMap, normalMapTexture);
+                        var meshes = Resources.FindObjectsOfTypeAll<MeshRenderer>();
+                        foreach (var mesh in meshes)
+                        {
+                            var so = new SerializedObject(mesh);
+                            so.FindProperty("m_ScaleInLightmap").floatValue = 1;
+                            so.ApplyModifiedProperties();
+                        }
+                    };
+            }
+        }
+
+        GUILayout.Space(5);
+        using (new GUILayout.HorizontalScope("box"))
+        {
+            targetObject =
+                (GameObject)EditorGUILayout.ObjectField("Target Object", targetObject, typeof(GameObject), true);
+            if (GUILayout.Button("Move Selected to Clutter", Style.Button))
+                _guiEventAction = () =>
+                {
+                    if (!CheckGoodSelection()) return;
+                    var clutter = targetObject != null
+                        ? targetObject
+                        : GameObject.Find("Clutters") ?? new GameObject("Clutters");
+
+                    foreach (var select in Selection.objects)
+                    {
+                        var currentObject = (GameObject)select;
+                        currentObject.transform.parent = clutter.transform;
                     }
+                };
+        }
 
-                    AssetDatabase.CreateAsset(material, Path.Combine(targetPath, $"{name}.mat").ToUnixPath());
+        GUILayout.Space(5);
+
+        using (new GUILayout.VerticalScope("box"))
+        {
+            GUILayout.Label("Multi-Rename", Style.Header);
+            PrepostString = EditorGUILayout.TextField("Pre/Postfix Text", PrepostString);
+
+            using (new GUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("Add to Front", Style.Button) && CheckGoodSelection())
+                    _guiEventAction = () => { UnityMacros.AddPrefixOnName(PrepostString); };
+                if (GUILayout.Button("Add to End", Style.Button) && CheckGoodSelection())
+                    _guiEventAction = () => { UnityMacros.AddPostfixOnName(PrepostString); };
+                if (GUILayout.Button("Remove", Style.Button) && CheckGoodSelection())
+                    _guiEventAction = () => { UnityMacros.ReplaceTextOfName(PrepostString, ""); };
+                if (GUILayout.Button("SetTo", Style.Button) && CheckGoodSelection())
+                    _guiEventAction = () => { UnityMacros.SetName(PrepostString); };
+                if (GUILayout.Button("Sequence", Style.Button) && CheckGoodSelection())
+                    _guiEventAction = () => { UnityMacros.SetNameSequence(PrepostString); };
+            }
+        }
+
+        using (new GUILayout.VerticalScope("box"))
+        {
+            GUILayout.Label("Initialize Dynamic Bones", Style.Header);
+            using (new GUILayout.HorizontalScope())
+                selectedPresetIndex = EditorGUILayout.Popup("Dynamic Bone Preset", selectedPresetIndex,
+                    DynamicBones.GetPresetList());
+
+            if (GUILayout.Button("Apply", Style.Button))
+                _guiEventAction = () => { DynamicBones.Apply(selectedPresetIndex); };
+        }
+
+        using (new GUILayout.VerticalScope("box"))
+        {
+            if (GUILayout.Button("Remove all lightmap related shtis"))
+            {
+                var scene = SceneManager.GetActiveScene();
+                var renderers = scene.GetRootGameObjects().SelectMany(x => x.GetComponentsInChildren<Renderer>());
+                foreach (var renderer in renderers)
+                {
                 }
-            };
+            }
+        }
 
-        GUILayout.EndVertical();
+        using (new GUILayout.VerticalScope("box"))
+        {
+            if (GUILayout.Button("Fix 2019+ Models", Style.Button))
+            {
+                var scene = SceneManager.GetActiveScene();
+                var renderers = scene.GetRootGameObjects().SelectMany(x => x.GetComponentsInChildren<Renderer>());
+                var meshes = Directory.GetFiles(PathUtils.GetProjectPath(), "*.fbx", SearchOption.AllDirectories)
+                    .SelectMany(x => AssetDatabase.LoadAllAssetsAtPath(x).OfType<Mesh>())
+                    .GroupBy(x => x.name, StringComparer.Ordinal)
+                    .ToDictionary(x => x.Key, x => x.ToArray());
+                Debug.Log(meshes);
+
+                foreach (var r in renderers)
+                {
+                    if (r is MeshRenderer mr)
+                    {
+                        var mf = r.gameObject.GetComponent<MeshFilter>();
+                        if (mf.sharedMesh == null && meshes.TryGetValue(r.name, out var m) && m.Length > 0)
+                            mf.sharedMesh = m.FirstOrDefault();
+                        if (mf.sharedMesh == null)
+                        {
+                        }
+                    }
+                    else if (r is SkinnedMeshRenderer smr)
+                    {
+                        if (smr.sharedMesh == null && meshes.TryGetValue(r.name, out var m) && m.Length > 0)
+                            smr.sharedMesh = m.FirstOrDefault();
+                    }
+                }
+            }
+        }
+
+        GUILayout.Space(5);
+        using (new GUILayout.VerticalScope("box"))
+        {
+            if (GUILayout.Button("Auto-Generate Materials", Style.Button))
+                _guiEventAction = () =>
+                {
+                    var targetPath = PathUtils.GetProjectPath();
+                    var basePath = Path.Combine(Directory.GetCurrentDirectory(), targetPath);
+                    var filesWithRegex = PathUtils.GetFilesWithRegex(basePath, @"\.(jpg|png|tif|tga)");
+                    var normalizedFiles = filesWithRegex.ToDictionary(Path.GetFileNameWithoutExtension, x => x);
+                    foreach (var file in filesWithRegex.Where(x => Path.GetFileName(x).StartsWith("ALB_")))
+                    {
+                        var name = Path.GetFileNameWithoutExtension(file);
+                        var matPath = Path.Combine(basePath, $"{name}.mat");
+                        if (File.Exists(matPath)) File.Delete(matPath);
+                        var material = new Material(Shader.Find("Standard")) { color = Color.white };
+                        var diffuseTexture =
+                            AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(targetPath, Path.GetFileName(file)));
+                        material.SetTexture(MainTex, diffuseTexture);
+                        if (normalizedFiles.TryGetValue(name.Replace("ALB_", "NRM_"), out var normalPath))
+                        {
+                            var normalMapTexture =
+                                AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(targetPath,
+                                    Path.GetFileName(normalPath)));
+                            material.SetTexture(BumpMap, normalMapTexture);
+                        }
+
+                        AssetDatabase.CreateAsset(material, Path.Combine(targetPath, $"{name}.mat").ToUnixPath());
+                    }
+                };
+        }
     }
 
     private static void ShowcaseMode()
     {
         for (var i = 0; i < Selection.objects.Length; i++)
         {
-            var currentObject = (GameObject) Selection.objects[i];
-            var curRow = (int) Mathf.Floor(i / (float) Cols);
+            var currentObject = (GameObject)Selection.objects[i];
+            var curRow = (int)Mathf.Floor(i / (float)Cols);
             var curCol = i % Cols;
 
             if (currentObject != null)
