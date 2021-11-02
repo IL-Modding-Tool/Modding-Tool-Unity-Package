@@ -1,4 +1,7 @@
 ﻿using System;
+using FuzzySharp.SimilarityRatio;
+using FuzzySharp.SimilarityRatio.Scorer.StrategySensitive;
+using MyBox;
 using Object = UnityEngine.Object;
 #pragma warning disable 618
 using System.IO;
@@ -9,6 +12,7 @@ using UnityEngine;
 #pragma warning restore 618
 
 #if UNITY_EDITOR
+using FuzzySharp.SimilarityRatio.Scorer;
 using hooh_ModdingTool.asm_Packer.Editor;
 using UnityEngine.SceneManagement;
 using Style = Common.HoohWindowStyles;
@@ -18,6 +22,9 @@ public partial class HoohTools
     private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
     private static readonly int MainTex = Shader.PropertyToID("_MainTex");
     private int selectedPresetIndex = 0;
+
+    // Ratio'd
+    public static readonly IRatioScorer PartialRatio = ScorerCache.Get<PartialRatioScorer>();
 
     private void DrawUnityUtility(SerializedObject serializedObject)
     {
@@ -155,23 +162,32 @@ public partial class HoohTools
                     .SelectMany(x => AssetDatabase.LoadAllAssetsAtPath(x).OfType<Mesh>())
                     .GroupBy(x => x.name, StringComparer.Ordinal)
                     .ToDictionary(x => x.Key, x => x.ToArray());
-                Debug.Log(meshes);
+
 
                 foreach (var r in renderers)
                 {
-                    if (r is MeshRenderer mr)
+                    switch (r)
                     {
-                        var mf = r.gameObject.GetComponent<MeshFilter>();
-                        if (mf.sharedMesh == null && meshes.TryGetValue(r.name, out var m) && m.Length > 0)
-                            mf.sharedMesh = m.FirstOrDefault();
-                        if (mf.sharedMesh == null)
+                        case MeshRenderer mr:
                         {
+                            var mf = r.gameObject.GetComponent<MeshFilter>();
+                            if (mf.sharedMesh == null && meshes.TryGetValue(r.name, out var m) && m.Length > 0)
+                                mf.sharedMesh = m.FirstOrDefault();
+                        
+                            if (mf.sharedMesh != null) continue;
+                            // Search one more time with deeper fuzzy search. 
+                            // This is unacceptable.
+                            var winner = FuzzySharp.Process.ExtractOne(mr.name, meshes.Keys, null, PartialRatio);
+                            if (winner != null && meshes.TryGetValue(winner.Value, out var fm) && fm.Length > 0)
+                                mf.sharedMesh = fm.FirstOrDefault();
+                            break;
                         }
-                    }
-                    else if (r is SkinnedMeshRenderer smr)
-                    {
-                        if (smr.sharedMesh == null && meshes.TryGetValue(r.name, out var m) && m.Length > 0)
-                            smr.sharedMesh = m.FirstOrDefault();
+                        case SkinnedMeshRenderer smr:
+                        {
+                            if (smr.sharedMesh == null && meshes.TryGetValue(r.name, out var m) && m.Length > 0)
+                                smr.sharedMesh = m.FirstOrDefault();
+                            break;
+                        }
                     }
                 }
             }

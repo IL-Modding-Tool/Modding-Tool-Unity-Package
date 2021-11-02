@@ -15,7 +15,8 @@
     "precompiledReferences": [
         "ICSharpCode.SharpZipLib.dll",
         "LoremNET.dll",
-        "nQuant.Core.dll"
+        "nQuant.Core.dll",
+        "FuzzySharp.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": []

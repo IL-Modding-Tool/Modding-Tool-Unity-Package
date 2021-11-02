@@ -53,7 +53,7 @@ namespace AssetPipeline.Editor
                 RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
 
-        public static IRatioScorer partialRatio = ScorerCache.Get<PartialRatioScorer>();
+        public static readonly IRatioScorer PartialRatio = ScorerCache.Get<PartialRatioScorer>();
 
 
         private static string SaneString(string insaneString, string rendererName, string assetName)
@@ -97,7 +97,7 @@ namespace AssetPipeline.Editor
 
             var candidates = FuzzySharp.Process
                 .ExtractTop(SaneString(material.name, renderer.name, Path.GetFileNameWithoutExtension(assetPath)),
-                    files, null, partialRatio, 10)
+                    files, null, PartialRatio, 10)
                 .Select(x => x.Value).ToArray();
 
             if (!material.shader.name.Contains("RMA"))
@@ -161,7 +161,7 @@ namespace AssetPipeline.Editor
 
             var candidates = FuzzySharp.Process
                 .ExtractTop(SaneString(materialName, renderer.name, Path.GetFileNameWithoutExtension(assetPath)),
-                    files, null, partialRatio, 10)
+                    files, null, PartialRatio, 10)
                 .Select(x => x.Value).ToArray();
 
             var diffuseCandidates = candidates.FirstOrDefault(x => DiffuseTextureRegex.IsMatch(x));
